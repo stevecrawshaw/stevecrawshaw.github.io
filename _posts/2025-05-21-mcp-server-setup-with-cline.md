@@ -14,11 +14,12 @@ This post will guide you through the process of setting up an MCP (Model Context
 
 MCP servers extend the capabilities of AI models by providing access to external tools and resources. This allows AI to interact with real-world systems, fetch live data, and perform actions beyond their inherent knowledge.
 
-### Steps to Setup
+### Install the Cline VS Code Extension
+This is done like any other extension. Search for it and install.
 
-1.  **Define Your Server's Purpose:** What tools or resources will your MCP server provide?
-2.  **Choose a Language/Framework:** Develop your server using a language and framework suitable for your needs (e.g., Node.js, Python).
-3.  **Implement MCP Protocol:** Ensure your server adheres to the MCP specification for tool and resource exposure.
-4.  **Integrate with Cline:** Configure Cline to recognize and utilize your new MCP server.
+### Specify the Model to use in Cline
+As I pay for Gemini I configured Cline to use Gemini by providing my API key. This is done in the settings of Cline. You can also specify the model you want to use, I used Gemini Flash 2.5.
 
-More details on each step will be provided in future updates.
+### MCP servers
+
+There are a few pre - configured options available from Cline. I successfully set up Perplexity and GitHub. But have struggled to get the Motherduck Server to work. I will update this post when I have it working.
