@@ -49,31 +49,6 @@ My system has an NVIDIA Quadro K2200, and I was using the open-source `nouveau` 
 5.  **Reboot your system.**
 
 After the reboot, `gnome-shell` was stable. I will observe the system for a few days to ensure the issue is fully resolved. The NVIDIA driver installation was smooth, and I noticed improved graphics performance immediately.
- Verifying with `nvidia-smi` confirmed the proprietary driver was active.
-
- Sat May 24 10:21:27 2025       
-+-----------------------------------------------------------------------------------------+
-| NVIDIA-SMI 570.133.07             Driver Version: 570.133.07     CUDA Version: 12.8     |
-|-----------------------------------------+------------------------+----------------------+
-| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
-| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
-|                                         |                        |               MIG M. |
-|=========================================+========================+======================|
-|   0  Quadro K2200                   Off |   00000000:03:00.0  On |                  N/A |
-| 42%   41C    P0              3W /   39W |     660MiB /   4096MiB |      7%      Default |
-|                                         |                        |                  N/A |
-+-----------------------------------------+------------------------+----------------------+
-                                                                                         
-+-----------------------------------------------------------------------------------------+
-| Processes:                                                                              |
-|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
-|        ID   ID                                                               Usage      |
-|=========================================================================================|
-|    0   N/A  N/A            3271      G   /usr/lib/xorg/Xorg                      214MiB |
-|    0   N/A  N/A            3492      G   /usr/bin/gnome-shell                    162MiB |
-|    0   N/A  N/A            4524      G   ...led --variations-seed-version         62MiB |
-|    0   N/A  N/A            5003      G   ...ess --variations-seed-version         72MiB |
-|    0   N/A  N/A            8877      G   /usr/bin/gnome-control-center            12MiB |
-+-----------------------------------------------------------------------------------------+
+Verifying with `nvidia-smi` confirmed the proprietary driver was active.
 
 This experience highlights the importance of using appropriate graphics drivers, especially for NVIDIA hardware, to ensure system stability on Linux. Google Gemini was used to support the fault - finding process.
