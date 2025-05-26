@@ -12,11 +12,13 @@ tags:
 - packages
 ---
 
-# [Posit Conf 2024](https://www.youtube.com/playlist?list=PL9HYL-VRX0oSFkdF4fJeY63eGDvgofcbn)
+# Posit Conf 2024
+
+[Youtube playlist](https://www.youtube.com/playlist?list=PL9HYL-VRX0oSFkdF4fJeY63eGDvgofcbn)
 
 ## Shannon Pileggi's talk on [Context is King](https://www.youtube.com/watch?v=eoI9QZdHBMw&list=PL9HYL-VRX0oSFkdF4fJeY63eGDvgofcbn&index=19) (labelling)
 
-1. Label fields in dataframes to provide context. Useful for reproducbility and business continuity.
+1. Label fields in dataframes to provide context. Useful for reproducibility and business continuity.
 2. The [labelled package](https://cran.r-project.org/web/packages/labelled/index.html) can help with this.
 3. But also labels are just attributes so can be done with `attr()`.
 4. Labels are supported in other packages like ggplot2 and GT
@@ -30,7 +32,7 @@ tags:
 
 Works with pacman.
 
-# [Tidypredict and orbital](https://www.youtube.com/watch?v=Qnm1y0KPxVM&list=PL9HYL-VRX0oSFkdF4fJeY63eGDvgofcbn&index=46)
+## [Tidypredict and orbital](https://www.youtube.com/watch?v=Qnm1y0KPxVM&list=PL9HYL-VRX0oSFkdF4fJeY63eGDvgofcbn&index=46)
 
 [Orbital](https://cran.r-project.org/web/packages/orbital/index.html) takes a finished model and decomposes it to a series of instructions (an Orbital object) that is somewhat portable. It minimises the number of variables and process in the model, and works with tree or linear - based models. It also includes the pre - processing steps from a tidymodels workflow, including recipes etc.
 
