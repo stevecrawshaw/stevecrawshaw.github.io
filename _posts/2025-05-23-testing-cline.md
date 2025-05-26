@@ -2,7 +2,7 @@
 
 **TLDR; Cline wasn't great at optimising my app's CSS and got stuck launching browser to review changes.**
 
-I continued to test operation of cline using the gemini model, this time to try and optimise the (LNRS Toolkit)[https://opendata.westofengland-ca.gov.uk/pages/lnrs-application/?headless=true] which I built. This is an app built on (opendatasoft's platform)[https://opendata.westofengland-ca.gov.uk/pages/homepage/] using ODS's widgets and AngularJS. I wanted to see if cline could help to optimise the operation and appearance of the app.
+I continued to test operation of cline using the gemini model, this time to try and optimise the [LNRS Toolkit](https://opendata.westofengland-ca.gov.uk/pages/lnrs-application/?headless=true) which I built. This is an app built on [opendatasoft's platform](https://opendata.westofengland-ca.gov.uk/pages/homepage/) using ODS's widgets and AngularJS. I wanted to see if cline could help to optimise the operation and appearance of the app.
 
 I gave the model my CSS and HTML files and asked it to review the code. It made several changes, as I just auto - approved the changes and modified the files. I copied the files into the ODS backoffice and then published the app. Unfortunately many of the changes were wrong, and the elements appeared in the wrong places.
 
