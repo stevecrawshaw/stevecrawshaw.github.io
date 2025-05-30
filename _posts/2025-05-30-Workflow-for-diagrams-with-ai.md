@@ -16,7 +16,7 @@ tags:
 
 A bit more detail on creating diagrams with tools like Excalidraw, Mermaid, and Draw.io.
 
-I experimented with [eraser](eraser.app.io) to create the ERD from the schema. The free tier has support for 5 diagrams. It worked well in creating the ERD. I did find the export process a bit clunky with the website appearing to hang. But I did get a nice png diagram out of it. So this is a good option for a quick ERD diagram from a schema.
+I experimented with [eraser](https://app.eraser.io/) to create the ERD from the schema. The free tier has support for 5 diagrams. It worked well in creating the ERD. I did find the export process a bit clunky with the website appearing to hang. But I did get a nice png diagram out of it. So this is a good option for a quick ERD diagram from a schema.
 
 <img src="https://github.com/stevecrawshaw/lnrs/blob/main/diagram-export-30-05-2025-11_27_01.png?raw=true" width = "800" alt="ERD from eraser.app.io" />
 
