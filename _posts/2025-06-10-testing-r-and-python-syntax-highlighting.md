@@ -14,6 +14,9 @@ tags:
 
 This post demonstrates the syntax highlighting capabilities for R and Python code in this blog.
 
+## Full Disclosure
+I got Cline to help me with this post. It really is magical how you can just ask it to do things and it does them. I am not sure how I lived without it before. I salute the AI Overlords.
+
 ## R Code Examples
 
 Here's a simple R example:
