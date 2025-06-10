@@ -17,4 +17,4 @@ The tricks here are to convert the WKB blobs to "raw" first - they are stored as
 
 The function is designed to be used within a `mutate` call in a `dplyr` pipeline, allowing for easy integration into data manipulation workflows.
 
-![](images/wkb_geopoint.png)
+<img src="/images/wkb_geopoint.png">
