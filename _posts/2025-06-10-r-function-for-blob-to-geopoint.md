@@ -17,7 +17,7 @@ The tricks here are to convert the WKB blobs to "raw" first - they are stored as
 
 The function is designed to be used within a `mutate` call in a `dplyr` pipeline, allowing for easy integration into data manipulation workflows.
 
-```r 
+`
 blob_to_geopoint <- function(blob_col) {
 #' Convert a column of WKB blobs to a vector of geopoint strings
 #' @param blob_col A column of WKB blobs, typically from a `sf` object or geoparquet file
@@ -43,5 +43,5 @@ blob_to_geopoint <- function(blob_col) {
 # Return the vector of geopoint strings
   unlist(gp_vec)
   
-}```
+}`
 
