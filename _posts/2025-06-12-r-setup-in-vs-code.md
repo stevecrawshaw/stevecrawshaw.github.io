@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Setup for R in VS Code
-date: 2025-06-12
+date: 2025-06-11
 categories: [R, Code]
 tags:
 - VS Code
