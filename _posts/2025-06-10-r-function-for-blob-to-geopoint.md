@@ -20,23 +20,29 @@ The function is designed to be used within a `mutate` call in a `dplyr` pipeline
 ```r
 
 blob_to_geopoint <- function(blob_col) {
-
+#' Convert a column of WKB blobs to a vector of geopoint strings
+#' @param blob_col A column of WKB blobs, typically from a sf object or geoparquet file
+#' @return A character vector of geopoint strings in the format "{lat,long}"  as required for the  ODS rendering of points
+#' @details This function uses `rlang::enquo` to capture the column name and `rlang::eval_tidy` to evaluate it.
+#' The function is designed to be used within a `mutate` call in a `dplyr` pipeline.
+#' to be used within a mutate function call
 bc <- enquo(blob_col)
-
-geom_list <- map(rlang::eval_tidy(bc),
+# Convert the WKB blobs to simple features geometries
+# The wkb blobs are represented as vectors in R
+  geom_list <- map(rlang::eval_tidy(bc),
       ~as.raw(.x) |> 
         st_as_sfc(wkb = TRUE))
-
-gp_vec <- vector(mode = "character", length = length(geom_list))
-
-gp_vec = map(geom_list,
+# set the length of the vector to the length of the geom_list
+  gp_vec <- vector(mode = "character", length = length(geom_list))
+# Iterate over the list to construct the geopoint strings
+  gp_vec = map(geom_list,
                ~paste0("{",
                        st_coordinates(.x)[2],
                        ",",
                        st_coordinates(.x)[1],
                        "}"))
-
-unlist(gp_vec)
+# Return the vector of geopoint strings
+  unlist(gp_vec)
   
 }
 
