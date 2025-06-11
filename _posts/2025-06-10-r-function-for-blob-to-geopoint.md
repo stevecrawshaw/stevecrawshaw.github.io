@@ -40,5 +40,5 @@ unlist(gp_vec)
   
 }
 
-```r
+```
 
