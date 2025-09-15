@@ -63,3 +63,15 @@ ATTACH 'https://github.com/stevecrawshaw/vs-code-setup/raw/refs/heads/main/m.db'
 SELECT * FROM m.glimpse(the_table);
 
 ```
+**Update 2025-15-09**
+
+Thanks to the [Webmacro extension](https://duckdb.org/community_extensions/extensions/webmacro.html), there is a slightly more elegant solution to making the macro available online:
+
+Simply publish the sql as a [Gist](https://gist.github.com/stevecrawshaw/9f0ec4f10873dc278246644502b50ab5) and use the only function available in this extension to call the Gist - thereby making it available in your environment.
+
+```sql
+INSTALL webmacro FROM community;
+LOAD webmacro;
+SELECT load_macro_from_url('https://gist.githubusercontent.com/stevecrawshaw/9f0ec4f10873dc278246644502b50ab5/raw/aa203681c9e88cc4e7c740cda3438ed2b1e8aa3b/glimpse.sql') as glimpse;
+
+```
