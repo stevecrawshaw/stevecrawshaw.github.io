@@ -19,7 +19,9 @@ The issue is that when importing data from various sources (corporate POSTGIS da
 
 - EPSG:4326 (WGS 84): This is the tricky one. The official definition by the standards body specifies the order as Latitude (Y) followed by Longitude (X). However, a huge number of geospatial tools, databases, and formats—most importantly the GeoJSON standard—expect the order to be Longitude (X) followed by Latitude (Y).
 
-DuckDB's ST_Transform function, by default, respects the official CRS definition. When it transforms from EPSG:27700 (X, Y) to EPSG:4326, it produces the officially correct but practically problematic (Y, X) or (Latitude, Longitude) output. When this (lat, lon) data is written to a GeoJSON file, a reader expecting (lon, lat) will interpret the latitude as longitude and vice versa, causing the geometry to be flipped and misplaced.
+DuckDB's ST_Transform function, by default, respects the official CRS definition. When it transforms from EPSG:27700 (X, Y) to EPSG:4326, it produces the officially correct but practically problematic (Y, X) or (Latitude, Longitude) output. So, it's important to note that **inside duckdb the spatial representation is correct**, and all spatial operations can be conducted on the data without flipping the co - ordinates.
+
+When this (lat, lon) data is written to a GeoJSON file, a reader expecting (lon, lat) will interpret the latitude as longitude and vice versa, causing the geometry to be flipped and misplaced. **Essentially this means that the order of co - ordinates needs only to be changed when the data is exported.**
 
 So I did some testing of various options to work this out. The SQL file below attaches to our corporate database and tests some options for CRS (Coordinate Reference System) conversion. Firstly I discovered that using the `always_xy := true` parameter will correctly order the vertex co - ordinates, when exporting to GeoJSON etc. **This is the optimum solution**.
 
@@ -48,19 +50,37 @@ SELECT * FROM weca_postgres.information_schema.tables;
 -- This syntax produces positionally correct geoJSON. Note the walrus operator for the 
 -- always_xy parameter
 -- https://duckdb.org/docs/stable/core_extensions/spatial/functions#st_transform
+
+-- Ingest the data using the ST_Transform() function to change CRS (no need for always_xy := true here)
 CREATE OR REPLACE TABLE lep_boundary_tbl AS
-SELECT ST_GeomFromWKB(shape).ST_Transform('EPSG:27700', 'EPSG:4326', always_xy := true) geometry
+SELECT ST_GeomFromWKB(shape).ST_Transform('EPSG:27700', 'EPSG:4326') geometry
 FROM weca_postgres.os.bdline_ua_lep_diss;
 
-COPY lep_boundary_tbl TO 'data/lep_boundary_4326_always_xy.geojson' WITH (FORMAT GDAL, DRIVER 'GeoJSON');
+-- # but for exporting we need to flip the co - ordinate order
+COPY (
+    SELECT 
+        -- "Transform" to the same CRS just to apply the axis-order flag
+        ST_Transform(geom, 'EPSG:4326', 'EPSG:4326', always_xy := true) AS geometry,
+        * EXCLUDE geom
+    FROM 
+        weca_postgres.os.bdline_ua_lep_diss
+) 
+TO 'data/exported_boundary_correct_order.geojson' 
+WITH (FORMAT GDAL, DRIVER 'GeoJSON');
 
 -- Using ST_Affine() applies a matrix transformation to the coordinates, which also has the same effect, ie
 -- it swaps the order of the coordinates for each vertex
-CREATE OR REPLACE TABLE lep_boundary_tbl AS
-SELECT ST_GeomFromWKB(shape).ST_Transform('EPSG:27700', 'EPSG:4326').ST_Affine(0,1,1,0,0,0) geometry
-FROM weca_postgres.os.bdline_ua_lep_diss;
-
-COPY lep_boundary_tbl TO 'data/lep_boundary_4326_st_affine.geojson' WITH (FORMAT GDAL, DRIVER 'GeoJSON');
+COPY (
+    SELECT 
+        -- Apply the affine transformation to swap x and y for each vertex
+        ST_Affine(geom, 0, 1, 1, 0, 0, 0) AS geometry,
+        -- Select any other columns you need
+        * EXCLUDE geom
+    FROM 
+        weca_postgres.os.bdline_ua_lep_diss
+) 
+TO 'data/exported_boundary_correct_order.geojson' 
+WITH (FORMAT GDAL, DRIVER 'GeoJSON');
 
 -- Reading the geojson export from the Open Data Portal export endpoint
 -- https://opendata.westofengland-ca.gov.uk/api/explore/v2.1/catalog/datasets/lep-boundary/exports/geojson?lang=en&timezone=Europe%2FLondon
@@ -75,9 +95,8 @@ FROM ST_Read('data/lep-boundary_ods.geojson');
 -- note the full file path is needed
 CREATE OR REPLACE TABLE lep_boundary_precise_tbl AS
 SELECT ST_GeomFromWKB(shape).ST_Transform('+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +units=m +no_defs +nadgrids=C:\\Users\\steve.crawshaw\\OSTN15-NTv2\\OSTN15_NTv2_OSGBtoETRS.gsb +type=crs',
-        'EPSG:4326', always_xy := true) AS geometry
+        'EPSG:4326') AS geometry
 FROM weca_postgres.os.bdline_ua_lep_diss;
 
-COPY lep_boundary_precise_tbl TO 'data/lep_boundary_precise_tbl.geojson' WITH (FORMAT GDAL, DRIVER 'GeoJSON');
 
 ```
