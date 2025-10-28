@@ -1,6 +1,6 @@
 ---
 layout: post
-title: AI Workflow: From deep research to ETL automation
+title: AI Workflow - from deep research to ETL automation
 date: 2025-10-28
 categories: [AI, ETL, Python, Automation]
 tags:
