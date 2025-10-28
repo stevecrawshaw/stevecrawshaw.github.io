@@ -46,6 +46,7 @@ I think this was a key step and stopped me getting bogged down in debugging.
 # Step 3: Running the ETL Script
 
 I didn't want to run the full date range initially, so I modified the script to run for two days. The script ran successfully and produced a Polars DataFrame with the expected data, so I reverted back to the full year and ran the script. Here's the output.
+
 ```sql
 2025-10-28 14:43:23,361 - INFO - Progress: 17568/17568 (100.0%)
 2025-10-28 14:43:23,363 - INFO - Data retrieval complete. Retrieved 35136 records
