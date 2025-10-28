@@ -14,7 +14,7 @@ tags:
 - Copilot
 ---
 
-# Introduction
+# AI Workflow - from deep research to ETL automation
 
 Although I have been using AI and agentic coding a little for the last year or so, I have not conducted a full process from deep research to ETL automation until recently. In this post, I will share my experience of using AI to streamline the workflow of researching the issue and then extracting, transforming, and loading (ETL) energy data from an API into a Polars DataFrame.
 
