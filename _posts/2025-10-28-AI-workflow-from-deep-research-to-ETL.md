@@ -46,7 +46,7 @@ I think this was a key step and stopped me getting bogged down in debugging.
 # Step 3: Running the ETL Script
 
 I didn't want to run the full date range initially, so I modified the script to run for two days. The script ran successfully and produced a Polars DataFrame with the expected data, so I reverted back to the full year and ran the script. Here's the output.
-
+```sql
 2025-10-28 14:43:23,361 - INFO - Progress: 17568/17568 (100.0%)
 2025-10-28 14:43:23,363 - INFO - Data retrieval complete. Retrieved 35136 records
 2025-10-28 14:43:23,405 - INFO - Created DataFrame with 35136 rows and 8 columns
@@ -54,10 +54,11 @@ I didn't want to run the full date range initially, so I modified the script to 
 2025-10-28 14:43:23,422 - INFO - Checkpoint file removed after successful completion
 2025-10-28 14:43:23,422 - INFO - Summary statistics:
 2025-10-28 14:43:23,423 - INFO -   Total records: 35136
-2025-10-28 14:43:23,423 - INFO -   Date range: 2024-01-01 to 2024-12-31  
+2025-10-28 14:43:23,423 - INFO -   Date range: 2024-01-01 to 2024-12-31
 2025-10-28 14:43:23,424 - INFO -   Units: T_SEAB-1
-2025-10-28 14:43:23,424 - INFO -   Total generation (MWh): 3597182.79    
+2025-10-28 14:43:23,424 - INFO -   Total generation (MWh): 3597182.79
 2025-10-28 14:43:23,424 - INFO - **Script completed in 266.71 seconds**
+```
 
 The initial assessment of how long this would take was 44 minutes, so the asyncio optimisation (and fixing its implementation using Gemini's code review) really paid off!
 
