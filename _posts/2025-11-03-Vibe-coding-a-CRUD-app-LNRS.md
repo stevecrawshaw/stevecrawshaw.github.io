@@ -117,4 +117,4 @@ I completed five hours of coding before the daily limit kicked in. Claude comple
 
 The app itself is not public, as I don't want randoms changing our database. Here's a screenshot.
 
-<img src="../images/lnrs-db-app-crud.streamlit.app.jpeg">
+<img src="https://github.com/stevecrawshaw/stevecrawshaw.github.io/blob/main/images/lnrs-db-app-crud.streamlit.app.jpeg">
