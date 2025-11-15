@@ -90,16 +90,8 @@ My mcp server setup is below - these live in `~/.claude.json`:
 
 ## 2. Mix Claude app with Claude Code
 
-I went down a rabbit hole trying to get Claude code to integrate an ERD (Entity Relationship Diagram) onto the app so that users can get a sense of how the tables relate. Despite giving what I thought was a clear prompt, the output wasn't great. CC suggested a mermaid chart, but it rendered in a postbox view and wasn't at all aesthetic. I ended up asking Claude chatbot to make me an ERD from the xml schema file and it did it nicely in REACT and created an artifact. I then embedded the artifact as an iframe in the app. It looks much better than the first attempt.
-
-<iframe 
-      src="https://claude.site/public/artifacts/63e84958-e21f-4fcc-b550-cc0ac63c
-  5a52/embed" 
-      height="900" 
-      width="100%" 
-      scrolling="yes"
-      style="border: 1px solid #e0e0e0; border-radius: 8px;">
-  </iframe>
+I went down a rabbit hole trying to get Claude code to integrate an ERD (Entity Relationship Diagram) onto the app so that users can get a sense of how the tables relate. Despite giving what I thought was a clear prompt, the output wasn't great. CC suggested a mermaid chart, but it rendered in a postbox view and wasn't at all aesthetic. I ended up asking Claude chatbot to make me an ERD from the xml schema file and it did it nicely in REACT and created an artifact. I then embedded the artifact as an iframe in the app. It looks [much better](https://claude.site/public/artifacts/63e84958-e21f-4fcc-b550-cc0ac63c
+  5a52) than the first attempt.
 
 ## 3. Hooks for formatting
 
