@@ -51,14 +51,6 @@ html {
   color: var(--ctp-text) !important;
 }
 
-body {
-  /* Very subtle grid background - optional */
-  background-image:
-    linear-gradient(var(--ctp-surface0) 1px, transparent 1px),
-    linear-gradient(90deg, var(--ctp-surface0) 1px, transparent 1px);
-  background-size: 50px 50px;
-  background-position: -1px -1px;
-}
 
 /* 4. Typography */
 code,
