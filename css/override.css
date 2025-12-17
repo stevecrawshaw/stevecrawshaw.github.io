@@ -109,7 +109,7 @@ pre {
 code {
   background-color: var(--ctp-surface0) !important;
   color: var(--ctp-text) !important;
-  padding: 2px 6px;
+  padding: 1px 3px;
   border-radius: 3px;
   font-size: 0.9em;
 }
