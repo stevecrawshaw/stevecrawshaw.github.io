@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow>
+  <metadata>
+    <name>Perplexity.ai Search Workflow</name>
+    <description>Generalized pattern for performing searches on Perplexity.ai using Claude in Chrome</description>
+    <created>2025-12-20</created>
+    <version>1.0</version>
+  </metadata>
+
+  <configuration>
+    <base_url>https://perplexity.ai</base_url>
+    <wait_time_seconds>3</wait_time_seconds>
+  </configuration>
+
+  <steps>
+    <step id="1" name="initialize_browser">
+      <description>Get browser context and available tabs</description>
+      <tool>mcp__claude-in-chrome__tabs_context_mcp</tool>
+      <parameters>
+        <parameter name="createIfEmpty">true</parameter>
+      </parameters>
+      <captures>
+        <capture name="tabId">Extract tab ID from available tabs</capture>
+      </captures>
+    </step>
+
+    <step id="2" name="navigate_to_perplexity">
+      <description>Navigate to Perplexity.ai homepage</description>
+      <tool>mcp__claude-in-chrome__navigate</tool>
+      <parameters>
+        <parameter name="tabId">{captured_tabId}</parameter>
+        <parameter name="url">https://perplexity.ai</parameter>
+      </parameters>
+    </step>
+
+    <step id="3" name="locate_search_input">
+      <description>Find the search input box on the page</description>
+      <tool>mcp__claude-in-chrome__find</tool>
+      <parameters>
+        <parameter name="query">search input box</parameter>
+        <parameter name="tabId">{captured_tabId}</parameter>
+      </parameters>
+      <captures>
+        <capture name="search_input_ref">Extract ref ID from matching element (typically ref_13)</capture>
+      </captures>
+      <element_patterns>
+        <pattern type="helper_text">Ask anything. Type @ for mentions and / for shortcuts.</pattern>
+        <pattern type="element_type">textbox</pattern>
+      </element_patterns>
+    </step>
+
+    <step id="4" name="click_search_input">
+      <description>Click on the search input to focus it</description>
+      <tool>mcp__claude-in-chrome__computer</tool>
+      <parameters>
+        <parameter name="action">left_click</parameter>
+        <parameter name="ref">{captured_search_input_ref}</parameter>
+        <parameter name="tabId">{captured_tabId}</parameter>
+      </parameters>
+    </step>
+
+    <step id="5" name="enter_search_query">
+      <description>Type the search query into the input field</description>
+      <tool>mcp__claude-in-chrome__computer</tool>
+      <parameters>
+        <parameter name="action">type</parameter>
+        <parameter name="text">{SEARCH_QUERY}</parameter>
+        <parameter name="tabId">{captured_tabId}</parameter>
+      </parameters>
+      <variables>
+        <variable name="SEARCH_QUERY" type="string" required="true">
+          <description>The search query to execute</description>
+          <example>Tesla's tower at Wardenclyffe</example>
+        </variable>
+      </variables>
+    </step>
+
+    <step id="6" name="submit_search">
+      <description>Press Enter to submit the search</description>
+      <tool>mcp__claude-in-chrome__computer</tool>
+      <parameters>
+        <parameter name="action">key</parameter>
+        <parameter name="text">Return</parameter>
+        <parameter name="tabId">{captured_tabId}</parameter>
+      </parameters>
+      <expected_outcome>
+        <url_change>
+          <pattern>https://www.perplexity.ai/search/.*</pattern>
+        </url_change>
+      </expected_outcome>
+    </step>
+
+    <step id="7" name="wait_for_results">
+      <description>Wait for search results to load</description>
+      <tool>mcp__claude-in-chrome__computer</tool>
+      <parameters>
+        <parameter name="action">wait</parameter>
+        <parameter name="duration">{config.wait_time_seconds}</parameter>
+        <parameter name="tabId">{captured_tabId}</parameter>
+      </parameters>
+    </step>
+
+    <step id="8" name="handle_cookie_dialog" optional="true">
+      <description>Dismiss cookie consent dialog if present</description>
+      <tool>mcp__claude-in-chrome__find</tool>
+      <parameters>
+        <parameter name="query">Necessary Cookies button</parameter>
+        <parameter name="tabId">{captured_tabId}</parameter>
+      </parameters>
+      <captures>
+        <capture name="cookie_button_ref">Extract ref ID for cookie button</capture>
+      </captures>
+      <then>
+        <tool>mcp__claude-in-chrome__computer</tool>
+        <parameters>
+          <parameter name="action">left_click</parameter>
+          <parameter name="ref">{captured_cookie_button_ref}</parameter>
+          <parameter name="tabId">{captured_tabId}</parameter>
+        </parameters>
+      </then>
+    </step>
+
+    <step id="9" name="retrieve_results">
+      <description>Extract the search results as text</description>
+      <tool>mcp__claude-in-chrome__get_page_text</tool>
+      <parameters>
+        <parameter name="tabId">{captured_tabId}</parameter>
+      </parameters>
+      <captures>
+        <capture name="search_results">Full text content of search results</capture>
+      </captures>
+    </step>
+
+    <step id="10" name="capture_screenshot" optional="true">
+      <description>Take a screenshot of the results page</description>
+      <tool>mcp__claude-in-chrome__computer</tool>
+      <parameters>
+        <parameter name="action">screenshot</parameter>
+        <parameter name="tabId">{captured_tabId}</parameter>
+      </parameters>
+    </step>
+  </steps>
+
+  <result_structure>
+    <description>Perplexity results typically include the following sections</description>
+    <sections>
+      <section name="answer_summary">
+        <description>Main answer synthesized from sources</description>
+        <location>Top of results under "Answer" tab</location>
+      </section>
+      <section name="basic_facts">
+        <description>Bullet points with key facts</description>
+        <format>Unordered list items</format>
+      </section>
+      <section name="detailed_sections">
+        <description>Organized sections with headings covering different aspects</description>
+        <examples>
+          <example>Purpose and vision</example>
+          <example>Funding and abandonment</example>
+          <example>Current status</example>
+        </examples>
+      </section>
+      <section name="sources">
+        <description>Number of reviewed sources shown at top</description>
+        <pattern>Reviewed [N] sources</pattern>
+      </section>
+      <section name="related_questions">
+        <description>Suggested follow-up questions at bottom</description>
+      </section>
+    </sections>
+  </result_structure>
+
+  <error_handling>
+    <error type="element_not_found">
+      <description>Search input element reference may change</description>
+      <mitigation>Use find tool to locate search input instead of hardcoded ref</mitigation>
+    </error>
+    <error type="browser_disconnected">
+      <description>Browser extension may lose connection</description>
+      <mitigation>Call tabs_context_mcp again to re-establish connection</mitigation>
+    </error>
+    <error type="page_load_timeout">
+      <description>Search results may take longer than expected</description>
+      <mitigation>Increase wait_time_seconds in configuration</mitigation>
+    </error>
+  </error_handling>
+
+  <example_usage>
+    <scenario>
+      <title>Search for historical information</title>
+      <input>
+        <search_query>Tesla's tower at Wardenclyffe</search_query>
+      </input>
+      <expected_output>
+        <summary>Comprehensive answer about Wardenclyffe Tower including history, purpose, funding, and current status</summary>
+        <sources>10+ academic and historical sources</sources>
+        <structure>Multiple sections with citations</structure>
+      </expected_output>
+    </scenario>
+  </example_usage>
+
+  <notes>
+    <note priority="high">Element references (ref_*) are dynamic and must be captured at runtime</note>
+    <note priority="medium">Cookie dialogs appear on first visit or after clearing cookies</note>
+    <note priority="medium">Wait time may need adjustment based on query complexity</note>
+    <note priority="low">Perplexity Pro features may affect available tabs (Answer, Links, Images)</note>
+  </notes>
+</workflow>
