@@ -20,8 +20,9 @@ So the fix is to firstly set up .Renviron file with the right `.libPaths()` in y
 The contents to add to the `.Renviron` file are:
 
 ```r
-.libPaths(new = "C:\\Users\\steve.crawshaw\\AppData\\Local\\Programs\\R\\R-4.5.0\\library")
+.libPaths(new = "C:\\Users\\steve.crawshaw\\AppData\\Local\\Programs\\R\\R-4.5.1\\library")
 ```
+
 I decided to add `radian` as my R terminal in VS Code, which is an alternative to the default R terminal and gives some nice features like autocomplete with tab. I installed it using `uv tool install radian` in the terminal. This should ensure it is added to the path and available everywhere, including VS Code.
 
 Then we need to make some changes to the user settings.json file in VS Code. You can access this by pressing `Ctrl + Shift + P` and typing `Preferences: Open Settings (JSON)`.
@@ -32,7 +33,7 @@ Add the following lines to the `settings.json` file:
     // R settings
     "r.plot.useHttpgd": true,
     "r.rterm.windows": "C:\\Users\\steve.crawshaw\\.local\\bin\\radian.exe",
-    "r.rpath.windows": "C:\\Users\\steve.crawshaw\\AppData\\Local\\Programs\\R\\R-4.5.0\\bin\\R.exe",
+    "r.rpath.windows": "C:\\Users\\steve.crawshaw\\AppData\\Local\\Programs\\R\\R-4.5.1\\bin\\R.exe",
     "r.lsp.debug": true,
     "r.lsp.diagnostics": true,
     "r.alwaysUseActiveTerminal": true,
@@ -44,4 +45,22 @@ Add the following lines to the `settings.json` file:
     "r.sessionWatcher": true,
 }
 ```
+
+Note that you will also need to create a `~/radian_profile` file to help to send the complete code chunk to the radian terminal without being broken up into separate lines. Here's how to do it.
+
+You must disable Radian's internal auto-indentation. To do this:
+
+```bash
+code ~/.radian_profile
+```
+
+Paste these lines.
+
+```R
+options(radian.auto_match = FALSE)
+options(radian.auto_indentation = FALSE)
+```
+
+Save and Close. Restart the Radian terminal.
+
 Now all works as expected. I can use R in VS Code with the latest version and all my libraries are available.
