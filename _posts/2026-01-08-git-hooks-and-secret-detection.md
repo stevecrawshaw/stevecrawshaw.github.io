@@ -5,11 +5,11 @@ date: 2026-01-08
 categories: git security development-tools
 ---
 
-## The Problem
+## Git Hooks for Secret Detection
 
 I recently spent time trying to prevent API keys and tokens from being accidentally committed to Git repositories. The goal was simple: scan staged files before each commit and block the commit if secrets were detected.
 
-The challenge? I reached for the wrong tool first, learned valuable lessons about choosing the right solution for the job, and ultimately implemented a robust approach that works across all my projects.
+I reached for the wrong tool first, learned valuable lessons about choosing the right solution for the job, and ultimately implemented a robust approach that works across all my projects.
 
 ## The False Start: Claude Code Hooks
 
@@ -25,7 +25,7 @@ My first instinct was to use Claude Code's `PreToolUse` hook system since I want
 }
 ```
 
-It didn't work.
+It didn't work. And working with Claude we got stuck in a few loops of configuring the hook and testing.
 
 I refined it:
 
@@ -42,6 +42,7 @@ Still nothing.
 After investigation, I discovered the real issue: **Claude Code hook matchers only match tool names, not command content.**
 
 The matcher field accepts:
+
 - `"Bash"` - matches the Bash tool exactly
 - `"Edit|Write"` - regex patterns for tool names
 - `"*"` - all tools
@@ -59,6 +60,7 @@ Even if the pattern worked, Claude Code hooks have fundamental limitations:
 The epiphany was realizing I should use git's built-in pre-commit hook system. This is exactly what it's designed for.
 
 **Why git pre-commit hooks are the correct solution:**
+
 - Catches **all commits** regardless of origin (Claude, terminal, IDE, etc.)
 - Works across **all your projects** automatically
 - No complex filtering or special configuration needed
@@ -214,26 +216,33 @@ This skips the pre-commit hook, but should be avoided unless absolutely necessar
 ## Key Learnings
 
 ### 1. Right Tool for the Job
+
 Don't force a tool into a purpose it wasn't designed for. Claude Code hooks are great for pre-flight checks on Claude-initiated operations, but git pre-commit hooks are the standard, portable solution for protecting commits.
 
 ### 2. Understand Your Tool's Constraints
+
 Before implementing, invest time understanding what a tool can and can't do:
+
 - Claude Code matchers filter by tool name, not command content
 - Git hooks run locally and catch all commits
 - Each has different strengths
 
 ### 3. Testing Matters
+
 A simple test with real secrets (simulated) caught the issue immediately. Don't assume documentation matches implementation.
 
 ### 4. Global Solutions Scale Better
+
 Setting up templates at the user level means every future project automatically gets protection. No per-project configuration needed.
 
 ### 5. Documentation Matters
+
 Documenting the system in a global configuration file (`CLAUDE.md`) ensures consistency and provides clear guidance for handling blocked commits across all projects.
 
 ## What Secrets Are Detected
 
 The scanning script detects patterns for:
+
 - **OpenAI API keys**: `sk-` followed by 48+ characters
 - **GitHub tokens**: `ghp_`, `gho_`, `ghu_`, `ghs_`, `ghr_` prefixes
 - **AWS access keys**: `AKIA` prefix
@@ -249,6 +258,7 @@ Sometimes the best solution isn't the fanciest one—it's the one designed speci
 ---
 
 **Tools used:**
+
 - Git pre-commit hooks (native)
 - Bash script for pattern matching
 - Global git templates for scaling
