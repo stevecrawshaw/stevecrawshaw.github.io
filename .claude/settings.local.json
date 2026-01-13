@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Skill(version-control)"
+      "Skill(version-control)",
+      "Bash(git add:*)",
+      "Bash(git push:*)"
     ]
   }
 }
