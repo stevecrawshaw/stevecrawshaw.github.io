@@ -1,14 +1,14 @@
 ## Why Your AI Assistant Needs to Read Column Comments Before Querying Your Database
 
-**TLDR; I asked Claude to find the "worst" environmental impact areas in our database. It confidently returned the BEST areas instead. The fix? A new skill that forces metadata verification before any analytical query. Here's what we learned about semantic errors and how to prevent them.**
+**TLDR; I asked Claude to find the "worst" environmental impact areas in our database. It confidently returned the BEST areas instead. The fix was a new skill that forces metadata verification before any analytical query. Here's what we learned about semantic errors and how to prevent them.**
 
-## The Setup: A Simple Query Gone Wrong
+## The Setup: When simple queries go wrong
 
-I was working with Claude Code on analyzing Energy Performance Certificate (EPC) data for the West of England Combined Authority. The task seemed straightforward:
+I was working with Claude Code on analyzing Energy Performance Certificate (EPC) data. The task seemed straightforward:
 
 > "Find the 5 LSOAs with the worst mean environmental impact for domestic properties"
 
-Claude dutifully connected to the DuckDB database, joined EPC data with geographic lookups, aggregated by LSOA, and returned results. The query executed perfectly. The SQL was clean. The joins were correct.
+Claude dutifully connected to the DuckDB database with [The Answering Service](https://motherduck.com/docs/key-tasks/ai-and-motherduck/mcp-workflows/), joined EPC data with geographic lookups using my [uk-geography skill](https://gist.github.com/stevecrawshaw/32578ef7cb3a7345ede1dd9765741865), aggregated by LSOA, and returned results. The query executed perfectly. The SQL was clean. The joins were correct.
 
 **The results were completely backwards.**
 
@@ -22,7 +22,7 @@ So it sorted descending and returned the top 5 scores:
 - South Gloucestershire 019H: 87.07
 - South Gloucestershire 034E: 86.92
 
-Problem is, these were actually the BEST performing areas, not the worst.
+These were actually the BEST performing areas, not the worst.
 
 ## The Hidden Semantic Inversion
 
@@ -43,16 +43,16 @@ Classic inverted scale. High score = good (low emissions). Low score = bad (high
 
 This is exactly like energy efficiency ratings - an A-rated property is more efficient than a G-rated one, even though A comes before G in the alphabet.
 
-## Why This Matters: Silent Semantic Errors
+## Silent Semantic Errors
 
-This isn't just an academic problem. Consider the consequences:
+Consider the consequences:
 
 1. **Policy decisions based on bad data** - Targeting improvement programs at already-efficient areas
 2. **Wasted resources** - Allocating funding to the wrong locations
 3. **Missed opportunities** - Overlooking areas that genuinely need intervention
-4. **Erosion of trust** - When analysts catch these errors, confidence in AI assistance drops
+4. **Erosion of trust** - When analysts catch these errors, confidence in AI (and the Analyst!) drops
 
-The scariest part? **The query executed perfectly.** No errors, no warnings, no indication anything was wrong. Just confidently incorrect results.
+**The query executed perfectly.** No errors, no warnings, no indication anything was wrong. Just confidently incorrect results.
 
 ## The Pattern: When Column Names Lie
 
@@ -70,7 +70,7 @@ You can't tell from the column name alone. You need the metadata.
 
 ## The Solution: Metadata-First Workflow
 
-We created a new Claude Code skill called `duckdb-query-assistant` that enforces this workflow:
+We created a new [Claude Code skill](https://gist.github.com/stevecrawshaw/4c892e9c404714eabf8f683e23d37b24) called `duckdb-query-assistant` that enforces this workflow:
 
 ### Before Every Analytical Query
 
@@ -125,30 +125,6 @@ lowest mean environmental impact ratings.
 [Proceeds with query using ORDER BY ASC]
 ```
 
-## The Broader Lesson: Schema Documentation Saves Lives
-
-This experience reinforced why our project invests heavily in schema documentation:
-
-- **3411 lines of code** dedicated to schema documentation toolkit
-- **Interactive comment editor** with session persistence
-- **Pattern inference engine** with confidence scoring
-- **XML schemas** for canonical metadata
-- **Automated comment generation** from multiple sources
-
-It's not just busywork. It's the difference between:
-
-- ✅ "Areas with scores below 50 have the highest emissions"
-- ❌ "Areas with scores above 85 need the most improvement" (backwards!)
-
-## Implementation: The Skill Specification
-
-The skill triggers on keywords like:
-
-- `duckdb`, `motherduck`, `query database`
-- `aggregate`, `mean`, `average`
-- `worst`, `best`, `highest`, `lowest`
-- Table patterns: `*_tbl`, `*_vw`
-
 **Enforcement level:** SUGGEST (not blocking)
 
 - Provides guidance and warnings
@@ -201,11 +177,11 @@ These are genuinely the worst-performing areas (lowest scores = highest emission
 1. **Column names are hints, not specifications** - Never assume semantics from names
 2. **Inverted scales are everywhere** - Ratings systems love them
 3. **Metadata is documentation** - Comments in `duckdb_columns()` are gold
-4. **Silent failures are dangerous** - Syntactically correct ≠ semantically correct
+4. **Silent failures are dangerous** - Syntactically correct ≠ semantically correct (bye bye career)
 5. **Skills can enforce good practices** - Automate the metadata-first workflow
 6. **When in doubt, ask** - Better to clarify than confidently err
 
-## Why This Matters for Your Projects
+## Use it for your Projects
 
 If you're working with:
 
@@ -215,27 +191,10 @@ If you're working with:
 - **Financial data** - Credit ratings, risk scores, performance indices
 - **Any domain with ratings systems** - Usually inverted from intuitive meaning
 
-You need this workflow. Either:
-
 - Train your AI assistants to check metadata first
 - Document your schemas comprehensively
 - Create skills/prompts that enforce verification
 - All of the above
-
-## The Cost of Getting It Wrong
-
-In our case, catching this error took:
-
-- 5 minutes to notice something seemed off
-- 2 minutes to query the metadata
-- 1 minute to rerun with correct sort direction
-
-If we hadn't caught it:
-
-- Wrong policy recommendations
-- Misdirected resources
-- Embarrassment when stakeholders questioned results
-- Loss of confidence in AI-assisted analysis
 
 **A few seconds checking metadata prevents hours debugging wrong results.**
 
@@ -243,7 +202,7 @@ If we hadn't caught it:
 
 We've now built this into our workflow as a reusable skill. Every time we query the database with analytical metrics, the skill activates and ensures metadata verification.
 
-You can implement similar patterns:
+Other options:
 
 - **SQL linters** - Check for ORDER BY on rating columns without comments
 - **Query templates** - Require comment queries before aggregations
@@ -254,7 +213,7 @@ You can implement similar patterns:
 
 The difference between a good data analysis and a dangerously wrong one can be a single ORDER BY clause going the wrong direction.
 
-Column names don't tell you enough. Assumptions are dangerous. Metadata is essential.
+Column names don't tell you enough. Assumptions are dangerous. Metadata is essential. DuckDB is life. Claude is alive!
 
 **Read the comments. Verify the scales. Ask when uncertain.**
 
@@ -265,38 +224,4 @@ Your future self (and your stakeholders) will thank you.
 ## Resources
 
 - [DuckDB System Tables Documentation](https://duckdb.org/docs/sql/information_schema)
-- Our schema documentation system: 3411 LOC of pattern inference, XML schemas, and interactive editing
-- The `duckdb-query-assistant` skill: Available in `~/.claude/skills/duckdb-query-assistant/`
-
-## Code Example: The Right Way
-
-```sql
--- STEP 1: Check metadata FIRST
-SELECT
-    column_name,
-    data_type,
-    comment
-FROM duckdb_columns()
-WHERE table_name = 'epc_domestic_vw'
-    AND column_name = 'ENVIRONMENT_IMPACT_CURRENT';
-
--- STEP 2: Parse comment, understand scale
--- Comment says: "higher rating = lower emissions"
--- Therefore: LOW score = WORSE (higher emissions)
-
--- STEP 3: Query with correct sort direction
-SELECT
-    lsoa_code,
-    lsoa_name,
-    COUNT(*) as properties,
-    ROUND(AVG(ENVIRONMENT_IMPACT_CURRENT), 2) as mean_impact
-FROM epc_with_geography
-WHERE local_authority IN ('E06000022', 'E06000023', 'E06000024', 'E06000025')
-    AND ENVIRONMENT_IMPACT_CURRENT IS NOT NULL
-GROUP BY lsoa_code, lsoa_name
-HAVING COUNT(*) >= 50  -- Minimum sample size
-ORDER BY mean_impact ASC  -- Ascending because low = worse
-LIMIT 5;
-```
-
-Remember: The few extra seconds to check metadata save hours of debugging and potential policy errors.
+- The `duckdb-query-assistant` [skill](https://gist.github.com/stevecrawshaw/4c892e9c404714eabf8f683e23d37b24): Available in `~/.claude/skills/duckdb-query-assistant/`
