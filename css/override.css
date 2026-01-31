@@ -116,10 +116,44 @@ h1 {
 h2 {
   font-size: 2rem;
   margin-top: 2.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid transparent;
+  background-image: linear-gradient(to right, var(--ctp-blue), var(--ctp-lavender), var(--ctp-mauve), var(--ctp-pink));
+  background-size: 200% 2px;
+  background-position: 0% 100%;
+  background-repeat: no-repeat;
+  animation: gradientShift 8s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 100%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
 }
 
 h3 {
   font-size: 1.5rem;
+  padding-left: 1rem;
+  border-left: 3px solid;
+}
+
+h3:nth-of-type(4n+1) {
+  border-left-color: var(--ctp-blue);
+}
+
+h3:nth-of-type(4n+2) {
+  border-left-color: var(--ctp-lavender);
+}
+
+h3:nth-of-type(4n+3) {
+  border-left-color: var(--ctp-mauve);
+}
+
+h3:nth-of-type(4n+4) {
+  border-left-color: var(--ctp-sapphire);
 }
 
 h4 {
@@ -376,27 +410,256 @@ hr::after {
   color: var(--ctp-text) !important;
 }
 
-/* 10. Tags & Categories */
+/* 10. Tags & Categories - Color Coded */
 .post-meta a {
   font-family: var(--font-mono) !important;
-  background: var(--ctp-surface0);
-  padding: 2px 8px;
-  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 4px 10px;
+  border-radius: 4px;
   font-size: 0.75em;
   text-decoration: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid var(--ctp-surface1);
+  border: 1px solid;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   display: inline-block;
+  margin: 2px;
+}
+
+/* Blue tags: data, analysis, database, sql */
+.post-meta a[href*="data"],
+.post-meta a[href*="analysis"],
+.post-meta a[href*="database"],
+.post-meta a[href*="sql"] {
+  border-color: var(--ctp-blue);
+  color: var(--ctp-blue);
+}
+
+.post-meta a[href*="data"]:hover,
+.post-meta a[href*="analysis"]:hover,
+.post-meta a[href*="database"]:hover,
+.post-meta a[href*="sql"]:hover {
+  background: var(--ctp-blue);
+  color: var(--ctp-base);
+  box-shadow: 0 0 12px rgba(137, 180, 250, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Green tags: setup, tool, workflow, config */
+.post-meta a[href*="setup"],
+.post-meta a[href*="tool"],
+.post-meta a[href*="workflow"],
+.post-meta a[href*="config"] {
+  border-color: var(--ctp-green);
+  color: var(--ctp-green);
+}
+
+.post-meta a[href*="setup"]:hover,
+.post-meta a[href*="tool"]:hover,
+.post-meta a[href*="workflow"]:hover,
+.post-meta a[href*="config"]:hover {
+  background: var(--ctp-green);
+  color: var(--ctp-base);
+  box-shadow: 0 0 12px rgba(166, 227, 161, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Yellow tags: learning, tip, tutorial, guide */
+.post-meta a[href*="learning"],
+.post-meta a[href*="tip"],
+.post-meta a[href*="tutorial"],
+.post-meta a[href*="guide"] {
+  border-color: var(--ctp-yellow);
+  color: var(--ctp-yellow);
+}
+
+.post-meta a[href*="learning"]:hover,
+.post-meta a[href*="tip"]:hover,
+.post-meta a[href*="tutorial"]:hover,
+.post-meta a[href*="guide"]:hover {
+  background: var(--ctp-yellow);
+  color: var(--ctp-base);
+  box-shadow: 0 0 12px rgba(249, 226, 175, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Peach tags: python, r, code, programming */
+.post-meta a[href*="python"],
+.post-meta a[href*="r"],
+.post-meta a[href*="code"],
+.post-meta a[href*="programming"] {
+  border-color: var(--ctp-peach);
+  color: var(--ctp-peach);
+}
+
+.post-meta a[href*="python"]:hover,
+.post-meta a[href*="r"]:hover,
+.post-meta a[href*="code"]:hover,
+.post-meta a[href*="programming"]:hover {
+  background: var(--ctp-peach);
+  color: var(--ctp-base);
+  box-shadow: 0 0 12px rgba(250, 179, 135, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Mauve tags: ai, ml, automation, agent */
+.post-meta a[href*="ai"],
+.post-meta a[href*="ml"],
+.post-meta a[href*="automation"],
+.post-meta a[href*="agent"] {
+  border-color: var(--ctp-mauve);
+  color: var(--ctp-mauve);
+}
+
+.post-meta a[href*="ai"]:hover,
+.post-meta a[href*="ml"]:hover,
+.post-meta a[href*="automation"]:hover,
+.post-meta a[href*="agent"]:hover {
+  background: var(--ctp-mauve);
+  color: var(--ctp-base);
+  box-shadow: 0 0 12px rgba(203, 166, 247, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Pink tags: design, ui, ux, visual */
+.post-meta a[href*="design"],
+.post-meta a[href*="ui"],
+.post-meta a[href*="ux"],
+.post-meta a[href*="visual"] {
+  border-color: var(--ctp-pink);
+  color: var(--ctp-pink);
+}
+
+.post-meta a[href*="design"]:hover,
+.post-meta a[href*="ui"]:hover,
+.post-meta a[href*="ux"]:hover,
+.post-meta a[href*="visual"]:hover {
+  background: var(--ctp-pink);
+  color: var(--ctp-base);
+  box-shadow: 0 0 12px rgba(245, 194, 231, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Teal tags: web, api, server, http */
+.post-meta a[href*="web"],
+.post-meta a[href*="api"],
+.post-meta a[href*="server"],
+.post-meta a[href*="http"] {
+  border-color: var(--ctp-teal);
+  color: var(--ctp-teal);
+}
+
+.post-meta a[href*="web"]:hover,
+.post-meta a[href*="api"]:hover,
+.post-meta a[href*="server"]:hover,
+.post-meta a[href*="http"]:hover {
+  background: var(--ctp-teal);
+  color: var(--ctp-base);
+  box-shadow: 0 0 12px rgba(148, 226, 213, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Sapphire tags: cloud, docker, devops, deploy */
+.post-meta a[href*="cloud"],
+.post-meta a[href*="docker"],
+.post-meta a[href*="devops"],
+.post-meta a[href*="deploy"] {
+  border-color: var(--ctp-sapphire);
+  color: var(--ctp-sapphire);
+}
+
+.post-meta a[href*="cloud"]:hover,
+.post-meta a[href*="docker"]:hover,
+.post-meta a[href*="devops"]:hover,
+.post-meta a[href*="deploy"]:hover {
+  background: var(--ctp-sapphire);
+  color: var(--ctp-base);
+  box-shadow: 0 0 12px rgba(116, 199, 236, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Red tags: debug, error, fix, issue */
+.post-meta a[href*="debug"],
+.post-meta a[href*="error"],
+.post-meta a[href*="fix"],
+.post-meta a[href*="issue"] {
+  border-color: var(--ctp-red);
+  color: var(--ctp-red);
+}
+
+.post-meta a[href*="debug"]:hover,
+.post-meta a[href*="error"]:hover,
+.post-meta a[href*="fix"]:hover,
+.post-meta a[href*="issue"]:hover {
+  background: var(--ctp-red);
+  color: var(--ctp-base);
+  box-shadow: 0 0 12px rgba(243, 139, 168, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Maroon tags: performance, optimization, speed */
+.post-meta a[href*="performance"],
+.post-meta a[href*="optimization"],
+.post-meta a[href*="speed"] {
+  border-color: var(--ctp-maroon);
+  color: var(--ctp-maroon);
+}
+
+.post-meta a[href*="performance"]:hover,
+.post-meta a[href*="optimization"]:hover,
+.post-meta a[href*="speed"]:hover {
+  background: var(--ctp-maroon);
+  color: var(--ctp-base);
+  box-shadow: 0 0 12px rgba(235, 160, 172, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Lavender tags: docs, reference, documentation */
+.post-meta a[href*="docs"],
+.post-meta a[href*="reference"],
+.post-meta a[href*="documentation"] {
+  border-color: var(--ctp-lavender);
+  color: var(--ctp-lavender);
+}
+
+.post-meta a[href*="docs"]:hover,
+.post-meta a[href*="reference"]:hover,
+.post-meta a[href*="documentation"]:hover {
+  background: var(--ctp-lavender);
+  color: var(--ctp-base);
+  box-shadow: 0 0 12px rgba(180, 190, 254, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Sky tags: test, qa, quality, validation */
+.post-meta a[href*="test"],
+.post-meta a[href*="qa"],
+.post-meta a[href*="quality"],
+.post-meta a[href*="validation"] {
+  border-color: var(--ctp-sky);
+  color: var(--ctp-sky);
+}
+
+.post-meta a[href*="test"]:hover,
+.post-meta a[href*="qa"]:hover,
+.post-meta a[href*="quality"]:hover,
+.post-meta a[href*="validation"]:hover {
+  background: var(--ctp-sky);
+  color: var(--ctp-base);
+  box-shadow: 0 0 12px rgba(137, 220, 235, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Flamingo tags: other, misc (default fallback) */
+.post-meta a {
+  border-color: var(--ctp-flamingo);
+  color: var(--ctp-flamingo);
 }
 
 .post-meta a:hover {
-  background: var(--ctp-surface1);
-  box-shadow:
-    0 0 8px rgba(137, 180, 250, 0.3),
-    0 4px 12px rgba(0, 0, 0, 0.3);
+  background: var(--ctp-flamingo);
+  color: var(--ctp-base);
+  box-shadow: 0 0 12px rgba(242, 205, 205, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
   transform: translateY(-2px);
-  border-color: var(--ctp-blue);
 }
 
 /* 11. Wrapper & Page Content */
@@ -462,103 +725,163 @@ blockquote::before {
   line-height: 1;
 }
 
-/* 14. Share Buttons Override */
+/* 14. Share Buttons - Enhanced with Catppuccin Colors */
 #share-buttons {
-  display: inline-block;
-  vertical-align: middle;
-}
-
-#share-buttons:after {
-  content: "";
-  display: block;
-  clear: both;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 1rem 0;
 }
 
 #share-buttons > div {
   position: relative;
-  text-align: left;
-  height: 36px;
-  width: 32px;
-  float: left;
-  text-align: center;
-  transition: all 0.2s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 44px;
 }
 
 #share-buttons > div > svg {
-  height: 16px;
-  fill: var(--ctp-overlay0);
-  margin-top: 10px;
-  transition: all 0.2s ease;
+  height: 20px;
+  width: 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-#share-buttons > div:hover {
-  cursor: pointer;
-}
-
-#share-buttons > div:hover > svg {
-  filter: drop-shadow(0 0 4px currentColor);
-}
-
-#share-buttons > div.facebook:hover > svg {
-  fill: var(--ctp-blue);
-}
-
-#share-buttons > div.twitter:hover > svg {
-  fill: var(--ctp-sky);
-}
-
-#share-buttons > div.linkedin:hover > svg {
-  fill: var(--ctp-sapphire);
-}
-
-#share-buttons > div.gplus:hover > svg {
-  fill: var(--ctp-peach);
-}
-
-#share-buttons > div.mail:hover > svg {
-  fill: var(--ctp-subtext0);
-}
-
-#share-buttons > div.instagram:hover > svg {
-  fill: var(--ctp-pink);
+/* Facebook - Blue */
+#share-buttons > div.facebook {
+  background: rgba(137, 180, 250, 0.1);
+  border: 1px solid var(--ctp-blue);
 }
 
 #share-buttons > div.facebook > svg {
-  height: 18px;
-  margin-top: 9px;
+  fill: var(--ctp-blue);
+}
+
+#share-buttons > div.facebook:hover {
+  background: var(--ctp-blue);
+  box-shadow: 0 0 16px rgba(137, 180, 250, 0.5);
+  transform: translateY(-2px);
+}
+
+#share-buttons > div.facebook:hover > svg {
+  fill: var(--ctp-base);
+}
+
+/* Twitter - Sky */
+#share-buttons > div.twitter {
+  background: rgba(137, 220, 235, 0.1);
+  border: 1px solid var(--ctp-sky);
 }
 
 #share-buttons > div.twitter > svg {
-  height: 20px;
-  margin-top: 8px;
+  fill: var(--ctp-sky);
+}
+
+#share-buttons > div.twitter:hover {
+  background: var(--ctp-sky);
+  box-shadow: 0 0 16px rgba(137, 220, 235, 0.5);
+  transform: translateY(-2px);
+}
+
+#share-buttons > div.twitter:hover > svg {
+  fill: var(--ctp-base);
+}
+
+/* LinkedIn - Sapphire */
+#share-buttons > div.linkedin {
+  background: rgba(116, 199, 236, 0.1);
+  border: 1px solid var(--ctp-sapphire);
 }
 
 #share-buttons > div.linkedin > svg {
-  height: 19px;
-  margin-top: 7px;
+  fill: var(--ctp-sapphire);
 }
 
-#share-buttons > div.pinterest > svg {
-  height: 20px;
-  margin-top: 9px;
+#share-buttons > div.linkedin:hover {
+  background: var(--ctp-sapphire);
+  box-shadow: 0 0 16px rgba(116, 199, 236, 0.5);
+  transform: translateY(-2px);
+}
+
+#share-buttons > div.linkedin:hover > svg {
+  fill: var(--ctp-base);
+}
+
+/* Google Plus - Peach */
+#share-buttons > div.gplus {
+  background: rgba(250, 179, 135, 0.1);
+  border: 1px solid var(--ctp-peach);
 }
 
 #share-buttons > div.gplus > svg {
-  height: 17px;
-  margin-top: 9px;
-  position: relative;
-  left: 1px;
+  fill: var(--ctp-peach);
+}
+
+#share-buttons > div.gplus:hover {
+  background: var(--ctp-peach);
+  box-shadow: 0 0 16px rgba(250, 179, 135, 0.5);
+  transform: translateY(-2px);
+}
+
+#share-buttons > div.gplus:hover > svg {
+  fill: var(--ctp-base);
+}
+
+/* Mail - Lavender */
+#share-buttons > div.mail {
+  background: rgba(180, 190, 254, 0.1);
+  border: 1px solid var(--ctp-lavender);
 }
 
 #share-buttons > div.mail > svg {
-  height: 14px;
-  margin-top: 11px;
+  fill: var(--ctp-lavender);
 }
 
-/* Share label color */
+#share-buttons > div.mail:hover {
+  background: var(--ctp-lavender);
+  box-shadow: 0 0 16px rgba(180, 190, 254, 0.5);
+  transform: translateY(-2px);
+}
+
+#share-buttons > div.mail:hover > svg {
+  fill: var(--ctp-base);
+}
+
+/* Instagram - Pink */
+#share-buttons > div.instagram {
+  background: rgba(245, 194, 231, 0.1);
+  border: 1px solid var(--ctp-pink);
+}
+
+#share-buttons > div.instagram > svg {
+  fill: var(--ctp-pink);
+}
+
+#share-buttons > div.instagram:hover {
+  background: var(--ctp-pink);
+  box-shadow: 0 0 16px rgba(245, 194, 231, 0.5);
+  transform: translateY(-2px);
+}
+
+#share-buttons > div.instagram:hover > svg {
+  fill: var(--ctp-base);
+}
+
+/* Share label with gradient */
 #share-buttons + span,
 span[style*="color: silver"] {
-  color: var(--ctp-subtext1) !important;
+  background: linear-gradient(135deg, var(--ctp-blue), var(--ctp-lavender));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
 /* 17. Post Card Depth & Elevation - Asymmetric Layout */
@@ -635,6 +958,21 @@ span[style*="color: silver"] {
   opacity: 0.4;
   font-size: 1.5rem;
 }
+
+/* Cycling border colors using all 13 Catppuccin colors */
+.post-list > li:nth-child(13n+1) { border-left-color: var(--ctp-blue); }
+.post-list > li:nth-child(13n+2) { border-right-color: var(--ctp-lavender); }
+.post-list > li:nth-child(13n+3) { border-top-color: var(--ctp-sapphire); }
+.post-list > li:nth-child(13n+4) { border-left-color: var(--ctp-sky); }
+.post-list > li:nth-child(13n+5) { border-right-color: var(--ctp-teal); }
+.post-list > li:nth-child(13n+6) { border-top-color: var(--ctp-green); }
+.post-list > li:nth-child(13n+7) { border-left-color: var(--ctp-yellow); }
+.post-list > li:nth-child(13n+8) { border-right-color: var(--ctp-peach); }
+.post-list > li:nth-child(13n+9) { border-top-color: var(--ctp-maroon); }
+.post-list > li:nth-child(13n+10) { border-left-color: var(--ctp-red); }
+.post-list > li:nth-child(13n+11) { border-right-color: var(--ctp-mauve); }
+.post-list > li:nth-child(13n+12) { border-top-color: var(--ctp-pink); }
+.post-list > li:nth-child(13n) { border-left-color: var(--ctp-flamingo); }
 
 .post-list > li:hover {
   transform: translateY(-4px);
