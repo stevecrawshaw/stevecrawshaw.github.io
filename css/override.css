@@ -5,6 +5,13 @@
 /* 1. Font Import */
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
 
+/* Font family variables */
+:root {
+  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+}
+
 /* 2. CSS Custom Properties (Catppuccin Mocha Colors) */
 :root {
   /* Backgrounds */
@@ -49,36 +56,93 @@ body,
 html {
   background-color: var(--ctp-base) !important;
   color: var(--ctp-text) !important;
+  font-family: var(--font-body);
+  line-height: 1.7;
 }
 
 
 /* 4. Typography */
-code,
-pre,
-.highlight {
-  font-family: "JetBrains Mono", "Courier New", monospace !important;
+
+/* Headings - Display font with hierarchy */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  color: var(--ctp-text) !important;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
 }
 
-/* Post metadata with monospace font */
-.post-meta {
-  font-family: "JetBrains Mono", monospace !important;
-  font-size: 0.85em;
-  letter-spacing: 0.02em;
-  color: var(--ctp-subtext1) !important;
+h1 {
+  font-size: 2.75rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--ctp-blue) 0%, var(--ctp-lavender) 50%, var(--ctp-mauve) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1.5rem;
+}
+
+h2 {
+  font-size: 2rem;
+  margin-top: 2.5rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+h4 {
+  font-size: 1.25rem;
+}
+
+h5, h6 {
+  font-size: 1.1rem;
 }
 
 /* Tech-style prefix for h2 headings */
 h2::before {
   content: "// ";
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-mono);
   color: var(--ctp-overlay1);
   font-size: 0.8em;
 }
 
-/* Headings color */
-h1, h2, h3, h4, h5, h6 {
-  color: var(--ctp-text) !important;
-  letter-spacing: -0.02em;
+/* Post title - larger and more prominent */
+.post-title {
+  font-size: 2.75rem !important;
+  font-family: var(--font-display) !important;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+}
+
+/* Body text - improved readability */
+body,
+p {
+  font-family: var(--font-body);
+  line-height: 1.7;
+  font-size: 1.05rem;
+}
+
+.post-content p {
+  margin-bottom: 1.5rem;
+}
+
+/* Code and technical elements - monospace */
+code,
+pre,
+.highlight {
+  font-family: var(--font-mono) !important;
+}
+
+/* Post metadata with monospace font */
+.post-meta {
+  font-family: var(--font-mono) !important;
+  font-size: 0.85em;
+  letter-spacing: 0.02em;
+  color: var(--ctp-subtext1) !important;
 }
 
 /* 5. Links & Interactions */
