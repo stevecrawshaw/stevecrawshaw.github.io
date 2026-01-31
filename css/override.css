@@ -148,16 +148,32 @@ pre,
 /* 5. Links & Interactions */
 a {
   color: var(--ctp-blue) !important;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 
 a:hover {
   color: var(--ctp-lavender) !important;
   text-shadow: 0 0 8px rgba(180, 190, 254, 0.3);
+  transform: translateY(-1px);
 }
 
 a:visited {
   color: var(--ctp-sapphire) !important;
+}
+
+/* Animated underlines for post links */
+.post-list a {
+  text-decoration: none;
+  background-image: linear-gradient(to right, var(--ctp-blue), var(--ctp-lavender));
+  background-size: 0% 2px;
+  background-position: left bottom;
+  background-repeat: no-repeat;
+  transition: background-size 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.post-list a:hover {
+  background-size: 100% 2px;
 }
 
 /* 6. Code Blocks */
@@ -168,6 +184,13 @@ pre {
   padding: 1em !important;
   border-radius: 4px;
   overflow-x: auto;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+pre:hover {
+  border-left-width: 5px;
+  box-shadow: -4px 0 16px rgba(137, 180, 250, 0.25);
+  transform: translateX(2px);
 }
 
 code {
@@ -461,6 +484,108 @@ blockquote {
 #share-buttons + span,
 span[style*="color: silver"] {
   color: var(--ctp-subtext1) !important;
+}
+
+/* 16. Micro-interactions & Motion */
+
+/* Keyframe animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    text-shadow: 0 0 8px rgba(137, 180, 250, 0.3);
+  }
+  50% {
+    text-shadow: 0 0 16px rgba(137, 180, 250, 0.5);
+  }
+}
+
+/* Staggered content reveal */
+.post-header {
+  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+.post-content > * {
+  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+.post-content > *:nth-child(1) { animation-delay: 0.1s; }
+.post-content > *:nth-child(2) { animation-delay: 0.15s; }
+.post-content > *:nth-child(3) { animation-delay: 0.2s; }
+.post-content > *:nth-child(4) { animation-delay: 0.25s; }
+.post-content > *:nth-child(5) { animation-delay: 0.3s; }
+.post-content > *:nth-child(n+6) { animation-delay: 0.35s; }
+
+/* Share buttons stagger */
+#share-buttons > div {
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+#share-buttons > div:nth-child(1) { animation-delay: 0.5s; }
+#share-buttons > div:nth-child(2) { animation-delay: 0.55s; }
+#share-buttons > div:nth-child(3) { animation-delay: 0.6s; }
+#share-buttons > div:nth-child(4) { animation-delay: 0.65s; }
+#share-buttons > div:nth-child(5) { animation-delay: 0.7s; }
+#share-buttons > div:nth-child(6) { animation-delay: 0.75s; }
+
+/* Navigation slides in from sides */
+.post_navi .nav_prev {
+  animation: slideInLeft 0.5s cubic-bezier(0.4, 0, 0.2, 1) backwards 0.4s;
+}
+
+.post_navi .nav_next {
+  animation: slideInRight 0.5s cubic-bezier(0.4, 0, 0.2, 1) backwards 0.4s;
+}
+
+/* Accessibility: Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* 15. Responsive Adjustments */
