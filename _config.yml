@@ -34,6 +34,12 @@ titles_from_headings:
   strip_title: true
   collections: true
 
+exclude:
+  - CLAUDE.md
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+
 defaults:
   - scope:
       path: ""
