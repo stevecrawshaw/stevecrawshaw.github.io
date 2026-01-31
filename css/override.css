@@ -246,7 +246,22 @@ pre code {
 hr {
   margin-top: 30px;
   margin-bottom: 20px;
-  border-color: var(--ctp-surface0) !important;
+  border: none;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--ctp-blue), var(--ctp-lavender), var(--ctp-mauve), transparent);
+  position: relative;
+}
+
+hr::after {
+  content: '◆';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--ctp-base);
+  padding: 0 1rem;
+  color: var(--ctp-lavender);
+  font-size: 0.8rem;
 }
 
 .post_navi {
@@ -546,7 +561,7 @@ span[style*="color: silver"] {
   color: var(--ctp-subtext1) !important;
 }
 
-/* 17. Post Card Depth & Elevation */
+/* 17. Post Card Depth & Elevation - Asymmetric Layout */
 .post-list > li {
   background: linear-gradient(135deg, rgba(49, 50, 68, 0.3) 0%, rgba(24, 24, 37, 0.3) 100%);
   border: 1px solid var(--ctp-surface0);
@@ -559,6 +574,66 @@ span[style*="color: silver"] {
     inset 0 1px 0 rgba(137, 180, 250, 0.05);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+}
+
+/* Odd cards: left offset, blue accent */
+.post-list > li:nth-child(odd) {
+  margin-left: 0;
+  margin-right: 2rem;
+  border-left: 3px solid var(--ctp-blue);
+}
+
+.post-list > li:nth-child(odd)::after {
+  content: '//';
+  position: absolute;
+  left: -2.5rem;
+  top: 1.5rem;
+  font-family: var(--font-mono);
+  color: var(--ctp-blue);
+  opacity: 0.4;
+  font-size: 1.2rem;
+}
+
+/* Even cards: right offset, lavender accent */
+.post-list > li:nth-child(even) {
+  margin-left: 2rem;
+  margin-right: 0;
+  border-right: 3px solid var(--ctp-lavender);
+  text-align: right;
+}
+
+.post-list > li:nth-child(even)::after {
+  content: '<<';
+  position: absolute;
+  right: -2.5rem;
+  top: 1.5rem;
+  font-family: var(--font-mono);
+  color: var(--ctp-lavender);
+  opacity: 0.4;
+  font-size: 1.2rem;
+}
+
+/* Every 3rd card: centered, sapphire accent */
+.post-list > li:nth-child(3n) {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 90%;
+  border-top: 3px solid var(--ctp-sapphire);
+  border-left: none;
+  border-right: none;
+  text-align: left;
+}
+
+.post-list > li:nth-child(3n)::after {
+  content: '>';
+  position: absolute;
+  left: 50%;
+  top: -2rem;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  color: var(--ctp-sapphire);
+  opacity: 0.4;
+  font-size: 1.5rem;
 }
 
 .post-list > li:hover {
@@ -586,6 +661,141 @@ span[style*="color: silver"] {
 
 .post-list > li:hover::before {
   opacity: 1;
+}
+
+/* Responsive: revert to single column on mobile */
+@media screen and (max-width: 768px) {
+  .post-list > li:nth-child(odd),
+  .post-list > li:nth-child(even),
+  .post-list > li:nth-child(3n) {
+    margin-left: 0;
+    margin-right: 0;
+    text-align: left;
+    border-left: 3px solid var(--ctp-blue);
+    border-right: none;
+    border-top: none;
+  }
+
+  .post-list > li::after {
+    display: none;
+  }
+}
+
+/* 18. Pull Quotes & Callouts */
+
+/* Pull quote - floated right */
+.pullquote {
+  float: right;
+  width: 40%;
+  margin: 0 0 1rem 2rem;
+  padding: 1rem 1.5rem;
+  font-size: 1.25rem;
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ctp-lavender);
+  border-left: 4px solid var(--ctp-lavender);
+  background: linear-gradient(135deg, rgba(180, 190, 254, 0.1) 0%, transparent 100%);
+  border-radius: 0 8px 8px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Callout boxes */
+.callout {
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  border-left: 4px solid;
+  position: relative;
+  padding-left: 3rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.callout::before {
+  position: absolute;
+  left: 1rem;
+  top: 1rem;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.callout.info {
+  background: linear-gradient(135deg, rgba(137, 180, 250, 0.15) 0%, rgba(137, 180, 250, 0.05) 100%);
+  border-left-color: var(--ctp-blue);
+  color: var(--ctp-text);
+}
+
+.callout.info::before {
+  content: 'i';
+  color: var(--ctp-blue);
+}
+
+.callout.warning {
+  background: linear-gradient(135deg, rgba(249, 226, 175, 0.15) 0%, rgba(249, 226, 175, 0.05) 100%);
+  border-left-color: var(--ctp-yellow);
+  color: var(--ctp-text);
+}
+
+.callout.warning::before {
+  content: '!';
+  color: var(--ctp-yellow);
+}
+
+.callout.success {
+  background: linear-gradient(135deg, rgba(166, 227, 161, 0.15) 0%, rgba(166, 227, 161, 0.05) 100%);
+  border-left-color: var(--ctp-green);
+  color: var(--ctp-text);
+}
+
+.callout.success::before {
+  content: '✓';
+  color: var(--ctp-green);
+}
+
+/* 19. Dynamic Content Spacing */
+
+/* Enhanced h2 spacing with separator */
+.post-content h2 {
+  margin-top: 3.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--ctp-surface0);
+}
+
+.post-content h2:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+/* Better list spacing */
+.post-content ul,
+.post-content ol {
+  margin: 1.5rem 0;
+  padding-left: 2rem;
+}
+
+.post-content li {
+  margin: 0.75rem 0;
+  line-height: 1.7;
+}
+
+/* Image frame treatment */
+.post-content img {
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid var(--ctp-surface0);
+}
+
+.post-content img:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border-color: var(--ctp-blue);
+}
+
+/* Code block spacing */
+.post-content pre {
+  margin: 2rem 0;
 }
 
 /* 16. Micro-interactions & Motion */
