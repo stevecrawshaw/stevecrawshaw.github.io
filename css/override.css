@@ -164,13 +164,6 @@ h5, h6 {
   font-size: 1.1rem;
 }
 
-/* Tech-style prefix for h2 headings */
-h2::before {
-  content: "// ";
-  font-family: var(--font-mono);
-  color: var(--ctp-overlay1);
-  font-size: 0.8em;
-}
 
 /* Post title - larger and more prominent */
 .post-title {
