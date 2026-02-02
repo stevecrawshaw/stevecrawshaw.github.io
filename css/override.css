@@ -725,163 +725,143 @@ blockquote::before {
   line-height: 1;
 }
 
-/* 14. Share Buttons - Enhanced with Catppuccin Colors */
-#share-buttons {
+/* 14. Share Buttons - Compact Toolbar */
+.share-links {
   display: flex;
-  gap: 0.5rem;
   align-items: center;
-  margin: 1rem 0;
+  gap: 0.6rem;
+  margin: 0.75rem 0 1.25rem;
+}
+
+.share-links > span[style*="color: silver"] {
+  background: linear-gradient(135deg, var(--ctp-overlay1), var(--ctp-lavender));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+#share-buttons {
+  display: inline-flex;
+  gap: 2px;
+  align-items: center;
+  margin: 0;
+  background: rgba(49, 50, 68, 0.5);
+  border: 1px solid var(--ctp-surface1);
+  border-radius: 6px;
+  padding: 3px;
 }
 
 #share-buttons > div {
   position: relative;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
+  border-radius: 4px;
+  border: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 44px;
-  height: 44px;
+  width: 32px;
+  height: 28px;
+  min-width: unset;
+  background: transparent;
 }
 
 #share-buttons > div > svg {
-  height: 20px;
-  width: 20px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 14px;
+  width: 14px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Facebook - Blue */
-#share-buttons > div.facebook {
-  background: rgba(137, 180, 250, 0.1);
-  border: 1px solid var(--ctp-blue);
-}
-
 #share-buttons > div.facebook > svg {
   fill: var(--ctp-blue);
 }
 
 #share-buttons > div.facebook:hover {
-  background: var(--ctp-blue);
-  box-shadow: 0 0 16px rgba(137, 180, 250, 0.5);
-  transform: translateY(-2px);
+  background: rgba(137, 180, 250, 0.15);
 }
 
 #share-buttons > div.facebook:hover > svg {
-  fill: var(--ctp-base);
+  fill: var(--ctp-blue);
+  filter: drop-shadow(0 0 4px rgba(137, 180, 250, 0.5));
 }
 
 /* Twitter - Sky */
-#share-buttons > div.twitter {
-  background: rgba(137, 220, 235, 0.1);
-  border: 1px solid var(--ctp-sky);
-}
-
 #share-buttons > div.twitter > svg {
   fill: var(--ctp-sky);
 }
 
 #share-buttons > div.twitter:hover {
-  background: var(--ctp-sky);
-  box-shadow: 0 0 16px rgba(137, 220, 235, 0.5);
-  transform: translateY(-2px);
+  background: rgba(137, 220, 235, 0.15);
 }
 
 #share-buttons > div.twitter:hover > svg {
-  fill: var(--ctp-base);
+  fill: var(--ctp-sky);
+  filter: drop-shadow(0 0 4px rgba(137, 220, 235, 0.5));
 }
 
 /* LinkedIn - Sapphire */
-#share-buttons > div.linkedin {
-  background: rgba(116, 199, 236, 0.1);
-  border: 1px solid var(--ctp-sapphire);
-}
-
 #share-buttons > div.linkedin > svg {
   fill: var(--ctp-sapphire);
 }
 
 #share-buttons > div.linkedin:hover {
-  background: var(--ctp-sapphire);
-  box-shadow: 0 0 16px rgba(116, 199, 236, 0.5);
-  transform: translateY(-2px);
+  background: rgba(116, 199, 236, 0.15);
 }
 
 #share-buttons > div.linkedin:hover > svg {
-  fill: var(--ctp-base);
+  fill: var(--ctp-sapphire);
+  filter: drop-shadow(0 0 4px rgba(116, 199, 236, 0.5));
 }
 
 /* Google Plus - Peach */
-#share-buttons > div.gplus {
-  background: rgba(250, 179, 135, 0.1);
-  border: 1px solid var(--ctp-peach);
-}
-
 #share-buttons > div.gplus > svg {
   fill: var(--ctp-peach);
 }
 
 #share-buttons > div.gplus:hover {
-  background: var(--ctp-peach);
-  box-shadow: 0 0 16px rgba(250, 179, 135, 0.5);
-  transform: translateY(-2px);
+  background: rgba(250, 179, 135, 0.15);
 }
 
 #share-buttons > div.gplus:hover > svg {
-  fill: var(--ctp-base);
+  fill: var(--ctp-peach);
+  filter: drop-shadow(0 0 4px rgba(250, 179, 135, 0.5));
 }
 
 /* Mail - Lavender */
-#share-buttons > div.mail {
-  background: rgba(180, 190, 254, 0.1);
-  border: 1px solid var(--ctp-lavender);
-}
-
 #share-buttons > div.mail > svg {
   fill: var(--ctp-lavender);
 }
 
 #share-buttons > div.mail:hover {
-  background: var(--ctp-lavender);
-  box-shadow: 0 0 16px rgba(180, 190, 254, 0.5);
-  transform: translateY(-2px);
+  background: rgba(180, 190, 254, 0.15);
 }
 
 #share-buttons > div.mail:hover > svg {
-  fill: var(--ctp-base);
+  fill: var(--ctp-lavender);
+  filter: drop-shadow(0 0 4px rgba(180, 190, 254, 0.5));
 }
 
 /* Instagram - Pink */
-#share-buttons > div.instagram {
-  background: rgba(245, 194, 231, 0.1);
-  border: 1px solid var(--ctp-pink);
-}
-
 #share-buttons > div.instagram > svg {
   fill: var(--ctp-pink);
 }
 
 #share-buttons > div.instagram:hover {
-  background: var(--ctp-pink);
-  box-shadow: 0 0 16px rgba(245, 194, 231, 0.5);
-  transform: translateY(-2px);
+  background: rgba(245, 194, 231, 0.15);
 }
 
 #share-buttons > div.instagram:hover > svg {
-  fill: var(--ctp-base);
-}
-
-/* Share label with gradient */
-#share-buttons + span,
-span[style*="color: silver"] {
-  background: linear-gradient(135deg, var(--ctp-blue), var(--ctp-lavender));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 0.9rem;
+  fill: var(--ctp-pink);
+  filter: drop-shadow(0 0 4px rgba(245, 194, 231, 0.5));
 }
 
 /* 17. Post Card Depth & Elevation - Asymmetric Layout */
