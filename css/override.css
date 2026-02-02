@@ -857,10 +857,11 @@ blockquote::before {
   filter: drop-shadow(0 0 4px rgba(245, 194, 231, 0.5));
 }
 
-/* 17. Post Card Depth & Elevation - Asymmetric Layout */
+/* 17. Post Card Depth & Elevation */
 .post-list > li {
   background: linear-gradient(135deg, rgba(49, 50, 68, 0.3) 0%, rgba(24, 24, 37, 0.3) 100%);
   border: 1px solid var(--ctp-surface0);
+  border-left: 3px solid var(--ctp-blue);
   border-radius: 8px;
   padding: 1.5rem;
   margin-bottom: 2rem;
@@ -872,80 +873,20 @@ blockquote::before {
   position: relative;
 }
 
-/* Odd cards: left offset, blue accent */
-.post-list > li:nth-child(odd) {
-  margin-left: 0;
-  margin-right: 2rem;
-  border-left: 3px solid var(--ctp-blue);
-}
-
-.post-list > li:nth-child(odd)::after {
-  content: '//';
-  position: absolute;
-  left: -2.5rem;
-  top: 1.5rem;
-  font-family: var(--font-mono);
-  color: var(--ctp-blue);
-  opacity: 0.4;
-  font-size: 1.2rem;
-}
-
-/* Even cards: right offset, lavender accent */
-.post-list > li:nth-child(even) {
-  margin-left: 2rem;
-  margin-right: 0;
-  border-right: 3px solid var(--ctp-lavender);
-  text-align: right;
-}
-
-.post-list > li:nth-child(even)::after {
-  content: '<<';
-  position: absolute;
-  right: -2.5rem;
-  top: 1.5rem;
-  font-family: var(--font-mono);
-  color: var(--ctp-lavender);
-  opacity: 0.4;
-  font-size: 1.2rem;
-}
-
-/* Every 3rd card: centered, sapphire accent */
-.post-list > li:nth-child(3n) {
-  margin-left: auto;
-  margin-right: auto;
-  max-width: 90%;
-  border-top: 3px solid var(--ctp-sapphire);
-  border-left: none;
-  border-right: none;
-  text-align: left;
-}
-
-.post-list > li:nth-child(3n)::after {
-  content: '>';
-  position: absolute;
-  left: 50%;
-  top: -2rem;
-  transform: translateX(-50%);
-  font-family: var(--font-mono);
-  color: var(--ctp-sapphire);
-  opacity: 0.4;
-  font-size: 1.5rem;
-}
-
-/* Cycling border colors using all 13 Catppuccin colors */
-.post-list > li:nth-child(13n+1) { border-left-color: var(--ctp-blue); }
-.post-list > li:nth-child(13n+2) { border-right-color: var(--ctp-lavender); }
-.post-list > li:nth-child(13n+3) { border-top-color: var(--ctp-sapphire); }
-.post-list > li:nth-child(13n+4) { border-left-color: var(--ctp-sky); }
-.post-list > li:nth-child(13n+5) { border-right-color: var(--ctp-teal); }
-.post-list > li:nth-child(13n+6) { border-top-color: var(--ctp-green); }
-.post-list > li:nth-child(13n+7) { border-left-color: var(--ctp-yellow); }
-.post-list > li:nth-child(13n+8) { border-right-color: var(--ctp-peach); }
-.post-list > li:nth-child(13n+9) { border-top-color: var(--ctp-maroon); }
+/* Cycling left-border colors using all 13 Catppuccin colors */
+.post-list > li:nth-child(13n+1)  { border-left-color: var(--ctp-blue); }
+.post-list > li:nth-child(13n+2)  { border-left-color: var(--ctp-lavender); }
+.post-list > li:nth-child(13n+3)  { border-left-color: var(--ctp-sapphire); }
+.post-list > li:nth-child(13n+4)  { border-left-color: var(--ctp-sky); }
+.post-list > li:nth-child(13n+5)  { border-left-color: var(--ctp-teal); }
+.post-list > li:nth-child(13n+6)  { border-left-color: var(--ctp-green); }
+.post-list > li:nth-child(13n+7)  { border-left-color: var(--ctp-yellow); }
+.post-list > li:nth-child(13n+8)  { border-left-color: var(--ctp-peach); }
+.post-list > li:nth-child(13n+9)  { border-left-color: var(--ctp-maroon); }
 .post-list > li:nth-child(13n+10) { border-left-color: var(--ctp-red); }
-.post-list > li:nth-child(13n+11) { border-right-color: var(--ctp-mauve); }
-.post-list > li:nth-child(13n+12) { border-top-color: var(--ctp-pink); }
-.post-list > li:nth-child(13n) { border-left-color: var(--ctp-flamingo); }
+.post-list > li:nth-child(13n+11) { border-left-color: var(--ctp-mauve); }
+.post-list > li:nth-child(13n+12) { border-left-color: var(--ctp-pink); }
+.post-list > li:nth-child(13n)    { border-left-color: var(--ctp-flamingo); }
 
 .post-list > li:hover {
   transform: translateY(-4px);
@@ -972,24 +913,6 @@ blockquote::before {
 
 .post-list > li:hover::before {
   opacity: 1;
-}
-
-/* Responsive: revert to single column on mobile */
-@media screen and (max-width: 768px) {
-  .post-list > li:nth-child(odd),
-  .post-list > li:nth-child(even),
-  .post-list > li:nth-child(3n) {
-    margin-left: 0;
-    margin-right: 0;
-    text-align: left;
-    border-left: 3px solid var(--ctp-blue);
-    border-right: none;
-    border-top: none;
-  }
-
-  .post-list > li::after {
-    display: none;
-  }
 }
 
 /* 18. Pull Quotes & Callouts */
