@@ -2,135 +2,102 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
+## Site Overview
 
-This is a Jekyll-based GitHub Pages blog focused on data analysis, programming, and technology. The blog uses the Minima theme with extensive custom styling based on the Catppuccin Mocha color palette and cyberpunk-inspired design elements.
+Jekyll blog ("Datablog") deployed to GitHub Pages. Theme: minima, heavily customized with Catppuccin Mocha dark palette. Posts cover R, Python, SQL, data engineering, and AI workflows.
+
+## Build & Deploy
+
+- **No local build tools installed** — no Ruby/Jekyll/Bundler on this machine
+- Deploys automatically via GitHub Pages on push to `main`
+- Build output (`_site/`) is gitignored
+- To test locally if Jekyll is available: `bundle exec jekyll serve`
 
 ## Architecture
 
-### Site Structure
+### Layout Chain
 
-- **_config.yml**: Jekyll configuration with site metadata, plugins (jekyll-feed, jekyll-sitemap), and theme settings
-- **_posts/**: Blog posts in Markdown format, named with convention `YYYY-MM-DD-title.md` (or `.html` for embedded notebooks)
-- **_layouts/**: Custom layouts extending the default theme
-  - `post.html`: Post layout with share links and navigation
-- **_includes/**: Reusable components
-  - `head.html`: HTML head with syntax highlighting setup
-  - `sharelinks.html`: Social sharing buttons
-  - `navlinks.html`: Previous/next post navigation
-- **css/**: Custom stylesheets
-  - `override.css`: Complete visual overhaul using Catppuccin Mocha theme
-- **js/highlightjs/**: Syntax highlighting library with language-specific modules
+`_layouts/post.html` extends the minima `default` layout and pulls in:
+- `_includes/head.html` — fonts, SEO, highlight.js setup, override.css link
+- `_includes/sharelinks.html` — social share toolbar (Facebook, Twitter, LinkedIn, Google+, Email)
+- `_includes/navlinks.html` — previous/next post navigation with archive fallback
 
-### Content Management
+### CSS
 
-Blog posts are written in Markdown with YAML front matter. Posts can be either:
-1. Standard Markdown files (`.md`)
-2. HTML files with embedded content (e.g., Jupyter notebook exports)
+Two stylesheets in `css/`:
+- **`override.css`** (~1200 lines) — the main theme override. Contains all Catppuccin Mocha color variables (`:root`), typography, post styling, share buttons, callout boxes, pull quotes, animations, and post-list cards. This is loaded in both `_includes/head.html` (site-wide) and `_layouts/post.html` (redundant but intentional).
+- **`archive.css`** — tag-based archive page with color-coded category sections cycling through the 13 Catppuccin accent colors.
 
-Post filenames must follow the pattern: `YYYY-MM-DD-title-with-hyphens.md`
-
-### Theming & Styling
-
-The site uses a heavily customized visual style:
-
-- **Base theme**: Jekyll Minima with custom overrides
-- **Color scheme**: Catppuccin Mocha (defined as CSS custom properties in override.css:9-45)
-- **Typography**: JetBrains Mono for code and monospace elements
-- **Syntax highlighting**: highlight.js with catppuccin-mocha theme
-  - Supported languages: Python, R, PowerShell, T-SQL, JSON, YAML, TOML, plaintext
-
-Custom visual features:
-- Tech-style prefixes ("> " on site title, "// " on h2 headings)
-- Neon glow effects on hover
-- Left border accent on code blocks
-- Alternating table row colors for readability
-
-## Development Workflow
-
-### Local Development
-
-Jekyll is not available in this Git Bash environment. For local testing, use a separate environment with Ruby and Jekyll installed, then:
-
-```bash
-bundle exec jekyll serve
-```
-
-The site will be available at `http://localhost:4000`
-
-### Creating New Posts
-
-1. Create a new file in `_posts/` with naming pattern: `YYYY-MM-DD-descriptive-title.md`
-2. Include YAML front matter at the top:
-   ```yaml
-   ---
-   title: "Your Post Title"
-   ---
-   ```
-3. Write content in Markdown below the front matter
-4. For code blocks, use fenced code blocks with language identifiers:
-   ````markdown
-   ```python
-   import polars as pl
-   df = pl.read_csv('data.csv')
-   ```
-   ````
-
-### Modifying Styles
-
-All custom styling is in `css/override.css`. The file uses CSS custom properties (CSS variables) for colors, making it easy to adjust the theme:
-
-- Base colors: Lines 10-13
-- Surface colors: Lines 16-18
-- Text colors: Lines 21-23
-- Accent colors: Lines 31-43
+All colors use CSS custom properties (`--ctp-blue`, `--ctp-surface0`, etc.) defined at the top of `override.css`.
 
 When modifying colors, update the CSS custom properties at the top of the file rather than hardcoding colors throughout.
 
 ### Syntax Highlighting
 
-The site uses highlight.js for code syntax highlighting. To add support for additional languages:
+Kramdown's built-in highlighter is **disabled** in `_config.yml`. Instead, highlight.js is loaded in `head.html` with the catppuccin-mocha theme. Supported languages: R, Python, PowerShell, T-SQL, JSON, YAML, TOML, plaintext.
 
+To add support for additional languages:
 1. Download the language module from https://highlightjs.org/download
 2. Place the `.min.js` file in `js/highlightjs/languages/`
-3. Add a script tag in `_includes/head.html` following the existing pattern (line 33-40)
+3. Add a script tag in `_includes/head.html` following the existing pattern
 
-Current theme is catppuccin-mocha (referenced at head.html:26).
+### Fonts
 
-## Important Patterns
+- Display: **Space Grotesk** (Google Fonts CDN, used for headings)
+- Code: **JetBrains Mono** (imported in override.css)
+- Body: system font stack
 
-### Navigation Links
+### Navigation & Sharing
 
-Post navigation (previous/next) is handled by `_includes/navlinks.html`. When the user is on the first or last post, the navigation links fall back to the blog archive page.
-
-### Share Buttons
-
-Social sharing buttons are included in posts via `sharelinks.html`. The SVG icons are styled to match the Catppuccin color palette with hover effects (override.css:304-362).
+- Post navigation (previous/next) handled by `_includes/navlinks.html`. Falls back to the archive page on first/last post.
+- Social sharing buttons included via `sharelinks.html`. SVG icons styled to match Catppuccin palette with hover effects.
 
 ### Responsive Design
 
-Mobile-specific adjustments are defined at override.css:403-417, including removal of background effects and adjusted navigation spacing.
+Mobile-specific adjustments are defined in `override.css`, including removal of background effects and adjusted navigation spacing.
 
-## File Organization
+## Post Conventions
 
+Front matter:
+```yaml
+---
+layout: post
+title: "Title"
+date: YYYY-MM-DD
+categories: [Category1, Category2]
+tags:
+- tag1
+- tag2
+---
 ```
-.
-├── _config.yml           # Jekyll configuration
-├── _posts/               # Blog post content (YYYY-MM-DD-title.md)
-├── _layouts/
-│   └── post.html         # Post template with navigation
-├── _includes/
-│   ├── head.html         # HTML head with syntax highlighting
-│   ├── navlinks.html     # Previous/next navigation
-│   └── sharelinks.html   # Social share buttons
-├── css/
-│   └── override.css      # Complete custom theme (Catppuccin Mocha)
-├── js/
-│   └── highlightjs/      # Syntax highlighting library
-├── images/               # Blog post images
-├── index.md              # Home page
-└── archive.md            # Post archive organized by tags
+
+Posts default to `tags: Other` if none specified (set in `_config.yml` defaults).
+
+Post filenames must follow the pattern: `YYYY-MM-DD-title-with-hyphens.md`. Posts can also be `.html` files (e.g., exported Jupyter notebooks).
+
+### Custom HTML Elements in Posts
+
+- **Pull quote**: `<div class="pullquote">Key insight text</div>`
+- **Callout boxes**: `<div class="callout info|warning|success">Message</div>`
+
+For code blocks, use fenced code blocks with language identifiers:
+````markdown
+```python
+import polars as pl
+df = pl.read_csv('data.csv')
 ```
+````
+
+## Key Config (`_config.yml`)
+
+- `exclude:` list includes CLAUDE.md, README.md, Gemfile — these won't appear in the built site
+- `titles_from_headings.strip_title: true` — prevents duplicate titles
+- `kramdown.syntax_highlighter_opts.disable: true` — highlight.js handles code blocks instead
+
+## Files to Avoid Modifying
+
+- `js/highlightjs/` — vendored third-party library, don't edit
+- `assets/main.css` — generated by minima theme, override via `css/override.css` instead
 
 ## Content Topics
 

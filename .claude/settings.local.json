@@ -4,9 +4,13 @@
       "Skill(version-control)",
       "Bash(git add:*)",
       "Bash(git push:*)",
+      "Bash(git commit:*)",
       "Bash(gem list:*)",
-      "Bash(git commit -m \"$\\(cat <<''EOF''\nStage 2: Add micro-interactions and motion design\n\n- Staggered fade-in animations for post content\n- Enhanced hover states with transforms and glow\n- Smooth cubic-bezier easing\n- Animated underlines for post links\n- Code block hover effects with border expansion\n- Share button stagger animation\n- Navigation slide-in from sides\n- Respects prefers-reduced-motion for accessibility\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Skill(humanizer)"
+      "Bash(tree:*)",
+      "Bash(grep:*)",
+      "Skill(frontend-design)",
+      "Skill(humanizer)",
+      "Bash(git rebase:*)"
     ]
   }
 }
