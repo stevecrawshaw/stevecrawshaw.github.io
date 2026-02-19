@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mca_data Schema Explorer</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0f1117; --surface: #1a1d27; --surface2: #242736;
+  --border: #2e3248; --text: #e2e8f0; --text-dim: #8892a4; --text-dimmer: #4a5568;
+  --col-key: #fbbf24; --col-view-badge: #06b6d4;
+}
+body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+.header { padding: 10px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px; background: var(--surface); flex-shrink: 0; }
+.header h1 { font-size: 15px; font-weight: 600; }
+.db-badge { background: #1e293b; border: 1px solid var(--border); padding: 2px 10px; border-radius: 4px; font-size: 12px; font-family: monospace; color: #7dd3fc; }
+.stats { margin-left: auto; font-size: 11px; color: var(--text-dim); }
+.tabs { display: flex; gap: 2px; padding: 8px 16px 0; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.tab-btn { padding: 6px 16px; border: none; background: transparent; color: var(--text-dim); cursor: pointer; font-size: 13px; font-family: inherit; border-radius: 6px 6px 0 0; border-bottom: 2px solid transparent; transition: all 0.15s; }
+.tab-btn:hover { color: var(--text); background: var(--surface2); }
+.tab-btn.active { color: var(--text); border-bottom-color: #6366f1; }
+.tab-panel { display: none; flex: 1; overflow: hidden; min-height: 0; }
+.tab-panel.active { display: flex; }
+.browser-layout { display: flex; width: 100%; height: 100%; overflow: hidden; }
+.sidebar { width: 270px; min-width: 200px; border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; background: var(--surface); }
+.sidebar-search { padding: 10px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.sidebar-search input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 12px; color: var(--text); font-family: inherit; }
+.sidebar-search input::placeholder { color: var(--text-dimmer); }
+.sidebar-search input:focus { outline: none; border-color: #6366f1; }
+.sidebar-tree { flex: 1; overflow-y: auto; padding: 6px 0; }
+.sidebar-tree::-webkit-scrollbar { width: 4px; }
+.sidebar-tree::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.group-header { padding: 8px 14px 3px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dimmer); display: flex; align-items: center; gap: 6px; }
+.group-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.tree-item { display: flex; align-items: center; gap: 8px; padding: 5px 14px; cursor: pointer; font-size: 12px; transition: background 0.1s; border-left: 2px solid transparent; }
+.tree-item:hover { background: var(--surface2); }
+.tree-item.selected { background: var(--surface2); border-left-color: #6366f1; }
+.item-icon { font-size: 10px; width: 14px; text-align: center; color: var(--text-dimmer); flex-shrink: 0; }
+.item-name { flex: 1; font-family: monospace; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.view-badge { font-size: 9px; background: rgba(6,182,212,0.15); color: var(--col-view-badge); border: 1px solid rgba(6,182,212,0.3); padding: 1px 5px; border-radius: 3px; flex-shrink: 0; }
+.detail-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); min-width: 0; }
+.detail-header { padding: 14px 20px 10px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.detail-header h2 { font-size: 13px; font-family: monospace; font-weight: 600; display: flex; align-items: center; gap: 8px; margin-bottom: 5px; flex-wrap: wrap; }
+.group-pill { font-size: 10px; font-family: system-ui; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+.detail-header .desc { font-size: 12px; color: var(--text-dim); margin-bottom: 6px; line-height: 1.4; }
+.detail-header .meta { font-size: 11px; color: var(--text-dimmer); display: flex; gap: 14px; flex-wrap: wrap; }
+.detail-tabs { display: flex; padding: 0 20px; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
+.detail-tab { padding: 7px 14px; font-size: 12px; cursor: pointer; color: var(--text-dim); border-bottom: 2px solid transparent; background: none; border-top: none; border-left: none; border-right: none; font-family: inherit; transition: color 0.15s; }
+.detail-tab:hover { color: var(--text); }
+.detail-tab.active { color: var(--text); border-bottom-color: #6366f1; }
+.detail-content { flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+.columns-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.col-search { padding: 10px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.col-search input { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; font-size: 12px; color: var(--text); font-family: inherit; width: 280px; }
+.col-search input::placeholder { color: var(--text-dimmer); }
+.col-search input:focus { outline: none; border-color: #6366f1; }
+.col-table-wrap { flex: 1; overflow-y: auto; padding: 0 20px 16px; }
+.col-table-wrap::-webkit-scrollbar { width: 4px; }
+.col-table-wrap::-webkit-scrollbar-thumb { background: var(--border); }
+table.col-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+table.col-table th { text-align: left; padding: 6px 10px; color: var(--text-dimmer); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 1; }
+table.col-table td { padding: 6px 10px; border-bottom: 1px solid rgba(46,50,72,0.4); vertical-align: top; }
+table.col-table tr:last-child td { border-bottom: none; }
+table.col-table tr:hover td { background: rgba(255,255,255,0.02); }
+.col-name { font-family: monospace; font-size: 12px; }
+.col-name.is-key { color: var(--col-key); }
+.key-icon { margin-left: 4px; font-size: 9px; }
+.col-type { font-family: monospace; font-size: 11px; color: #7dd3fc; }
+.col-comment { color: var(--text-dim); font-size: 11px; }
+.sql-section { flex: 1; padding: 16px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+.sql-controls { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.sql-controls label { font-size: 12px; color: var(--text-dim); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.sql-controls input[type="number"] { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 4px 8px; font-size: 12px; color: var(--text); font-family: monospace; width: 80px; }
+.sql-controls input:focus { outline: none; border-color: #6366f1; }
+.sql-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 16px 16px 16px; font-family: monospace; font-size: 12.5px; line-height: 1.7; position: relative; white-space: pre; overflow-x: auto; }
+.sql-copy-btn { position: absolute; top: 10px; right: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 4px 10px; font-size: 11px; color: var(--text-dim); cursor: pointer; font-family: inherit; transition: all 0.15s; }
+.sql-copy-btn:hover { color: var(--text); border-color: #6366f1; }
+.kw { color: #c084fc; } .tbl { color: #7dd3fc; } .cmt { color: var(--text-dimmer); font-style: italic; } .num { color: #fcd34d; }
+.diagram-panel { width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
+.diagram-controls { padding: 8px 16px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; align-items: center; background: var(--surface); flex-wrap: wrap; flex-shrink: 0; }
+.diagram-legend { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; font-size: 11px; }
+.legend-item { display: flex; align-items: center; gap: 5px; color: var(--text-dim); cursor: pointer; user-select: none; transition: opacity 0.15s; }
+.legend-item:hover { color: var(--text); }
+.legend-dot { width: 9px; height: 9px; border-radius: 50%; }
+.diagram-hint { margin-left: auto; font-size: 11px; color: var(--text-dimmer); }
+.svg-container { flex: 1; position: relative; overflow: hidden; }
+#diagram-svg { width: 100%; height: 100%; }
+.node-tooltip { position: absolute; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-size: 11px; pointer-events: none; display: none; z-index: 100; max-width: 230px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+.tt-name { font-family: monospace; font-weight: 600; margin-bottom: 3px; font-size: 12px; }
+.tt-desc { color: var(--text-dim); line-height: 1.4; margin-bottom: 3px; }
+.tt-cols { color: var(--text-dimmer); font-size: 10px; }
+.prompt-bar { border-top: 1px solid var(--border); background: var(--surface); padding: 10px 20px; display: flex; gap: 12px; align-items: flex-start; flex-shrink: 0; }
+.prompt-label { font-size: 10px; color: var(--text-dimmer); text-transform: uppercase; letter-spacing: 0.06em; padding-top: 3px; flex-shrink: 0; font-weight: 700; }
+.prompt-text { flex: 1; font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+.copy-prompt-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 5px 14px; font-size: 12px; color: var(--text-dim); cursor: pointer; font-family: inherit; flex-shrink: 0; transition: all 0.15s; }
+.copy-prompt-btn:hover { color: var(--text); border-color: #6366f1; }
+.empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dimmer); font-size: 13px; gap: 10px; }
+.empty-icon { font-size: 36px; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Schema Explorer</h1>
+  <div class="db-badge">mca_data</div>
+  <div class="stats">17 tables &middot; 7 views &middot; 5 theme groups</div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchMainTab('browser', this)">&#9635; Schema Browser</button>
+  <button class="tab-btn" onclick="switchMainTab('diagram', this)">&#9672; Relationship Diagram</button>
+</div>
+
+<div id="tab-browser" class="tab-panel active">
+  <div class="browser-layout">
+    <div class="sidebar">
+      <div class="sidebar-search">
+        <input type="text" id="sidebar-search" placeholder="Search tables &amp; views..." oninput="filterSidebar(this.value)">
+      </div>
+      <div class="sidebar-tree" id="sidebar-tree"></div>
+    </div>
+    <div class="detail-panel" id="detail-panel">
+      <div class="empty-state">
+        <div class="empty-icon">&#8862;</div>
+        <div>Select a table or view to explore its schema</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-diagram" class="tab-panel">
+  <div class="diagram-panel">
+    <div class="diagram-controls">
+      <div class="diagram-legend" id="diagram-legend"></div>
+      <div class="diagram-hint">Drag nodes &middot; Scroll to zoom &middot; Click to inspect</div>
+    </div>
+    <div class="svg-container" id="svg-container">
+      <svg id="diagram-svg" viewBox="0 0 1100 680" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="node-tooltip" id="node-tooltip"></div>
+    </div>
+  </div>
+</div>
+
+<div class="prompt-bar">
+  <div class="prompt-label">Prompt</div>
+  <div class="prompt-text" id="prompt-text">Select a table or view to generate a query prompt.</div>
+  <button class="copy-prompt-btn" onclick="copyPrompt()">Copy</button>
+</div>
+
+<script>
+// ── SCHEMA DATA ──────────────────────────────────────────────────────────────
+
+const GROUPS = {
+  'Boundaries':             { color: '#6366f1' },
+  'Geography/Lookup':       { color: '#10b981' },
+  'EPC/Energy Performance': { color: '#f59e0b' },
+  'GHG Emissions':          { color: '#ef4444' },
+  'Deprivation/Demographics':{ color: '#8b5cf6' },
+};
+
+const SCHEMA = [
+  // BOUNDARIES
+  { name:'bdline_ua_lep_diss_tbl', type:'table', group:'Boundaries',
+    desc:'WECA LEP (including North Somerset) boundary — dissolved single polygon',
+    cols:[{n:'name',t:'VARCHAR',c:'Name',k:false},{n:'shape',t:'WKB_BLOB',c:'Spatial geometry',k:false},{n:'id',t:'INTEGER',c:'Id',k:false}]},
+  { name:'bdline_ua_lep_tbl', type:'table', group:'Boundaries',
+    desc:'WECA LEP UA unitary authority boundaries',
+    cols:[{n:'name',t:'VARCHAR',c:'Name',k:false},{n:'code',t:'VARCHAR',c:'Code',k:false},{n:'shape',t:'WKB_BLOB',c:'Spatial geometry',k:false},{n:'id',t:'INTEGER',c:'Id',k:false}]},
+  { name:'bdline_ua_weca_diss_tbl', type:'table', group:'Boundaries',
+    desc:'WECA dissolved boundary — single polygon for the WECA area',
+    cols:[{n:'name',t:'VARCHAR',c:'Name',k:false},{n:'shape',t:'WKB_BLOB',c:'Spatial geometry',k:false},{n:'id',t:'INTEGER',c:'Id',k:false}]},
+  { name:'bdline_ward_lep_tbl', type:'table', group:'Boundaries',
+    desc:'Ward boundaries for unitary authorities in WECA LEP',
+    cols:[{n:'name',t:'VARCHAR',c:'Name',k:false},{n:'file_name',t:'VARCHAR',c:'File name',k:false},{n:'code',t:'VARCHAR',c:'Ward code',k:false},{n:'shape',t:'WKB_BLOB',c:'Spatial geometry',k:false},{n:'id',t:'INTEGER',c:'Id',k:false}]},
+  { name:'ca_boundaries_bgc_tbl', type:'table', group:'Boundaries',
+    desc:'Combined authority boundaries England UK (BGC generalised)',
+    cols:[{n:'FID',t:'INTEGER',c:'Feature ID',k:false},{n:'CAUTH25CD',t:'VARCHAR',c:'Combined authority code 2025',k:true},{n:'CAUTH25NM',t:'VARCHAR',c:'Combined authority name 2025',k:false},{n:'BNG_E',t:'INTEGER',c:'Easting (BNG)',k:false},{n:'BNG_N',t:'INTEGER',c:'Northing (BNG)',k:false},{n:'LONG',t:'DOUBLE',c:'Longitude',k:false},{n:'LAT',t:'DOUBLE',c:'Latitude',k:false},{n:'Shape__Area',t:'DOUBLE',c:'Shape area',k:false},{n:'Shape__Length',t:'DOUBLE',c:'Shape length',k:false},{n:'GlobalID',t:'VARCHAR',c:'Global ID',k:false},{n:'geom',t:'GEOMETRY',c:'Geometry (EPSG:27700)',k:false}]},
+  { name:'lsoa_2021_lep_tbl', type:'table', group:'Boundaries',
+    desc:'LSOA 2021 boundaries for the WECA LEP area',
+    cols:[{n:'lsoa21cd',t:'VARCHAR',c:'LSOA code 2021',k:true},{n:'lsoa21nm',t:'VARCHAR',c:'LSOA name 2021',k:false},{n:'area_m2',t:'DECIMAL(12,3)',c:'Area in square metres',k:false},{n:'shape',t:'WKB_BLOB',c:'Spatial geometry',k:false},{n:'id',t:'INTEGER',c:'Id',k:false}]},
+  // GEOGRAPHY/LOOKUP
+  { name:'boundary_lookup_tbl', type:'table', group:'Geography/Lookup',
+    desc:'Boundary lookup — maps postcodes to OA / LSOA / MSOA / LAD hierarchies',
+    cols:[{n:'pcd7',t:'VARCHAR',c:'Postcode (7 chars)',k:true},{n:'pcd8',t:'VARCHAR',c:'Postcode (8 chars)',k:true},{n:'pcds',t:'VARCHAR',c:'Postcode with space',k:true},{n:'dointr',t:'BIGINT',c:'Date of introduction (YYYYMM)',k:false},{n:'doterm',t:'BIGINT',c:'Date of termination (YYYYMM)',k:false},{n:'usertype',t:'BIGINT',c:'User type (0=small, 1=large)',k:false},{n:'oa21cd',t:'VARCHAR',c:'Output area code 2021',k:false},{n:'lsoa21cd',t:'VARCHAR',c:'LSOA code 2021',k:true},{n:'msoa21cd',t:'VARCHAR',c:'MSOA code 2021',k:false},{n:'ladcd',t:'VARCHAR',c:'Local Authority District code',k:true},{n:'lsoa21nm',t:'VARCHAR',c:'LSOA name 2021',k:false},{n:'msoa21nm',t:'VARCHAR',c:'MSOA name 2021',k:false},{n:'ladnm',t:'VARCHAR',c:'Local Authority District name',k:false},{n:'ladnmw',t:'VARCHAR',c:'LAD name (Welsh)',k:false}]},
+  { name:'ca_la_lookup_tbl', type:'table', group:'Geography/Lookup',
+    desc:'Combined authority to local authority lookup table',
+    cols:[{n:'LAD25CD',t:'VARCHAR',c:'Local authority district code 2025',k:true},{n:'LAD25NM',t:'VARCHAR',c:'Local authority district name 2025',k:false},{n:'CAUTH25CD',t:'VARCHAR',c:'Combined authority code 2025',k:true},{n:'CAUTH25NM',t:'VARCHAR',c:'Combined authority name 2025',k:false},{n:'ObjectId',t:'BIGINT',c:'Object ID',k:false}]},
+  { name:'codepoint_open_lep_tbl', type:'table', group:'Geography/Lookup',
+    desc:'Codepoint Open postcode data filtered to WECA LEP area',
+    cols:[{n:'postcode',t:'VARCHAR',c:'UK postal code',k:true},{n:'pc_nospace',t:'VARCHAR',c:'Postcode without space',k:false},{n:'admin_district_code',t:'VARCHAR',c:'Admin district code (LAD)',k:true},{n:'admin_ward_code',t:'VARCHAR',c:'Admin ward code',k:false},{n:'xco',t:'DECIMAL(10,2)',c:'Easting (BNG)',k:false},{n:'yco',t:'DECIMAL(10,2)',c:'Northing (BNG)',k:false},{n:'lon',t:'DECIMAL(9,7)',c:'Longitude',k:false},{n:'lat',t:'DECIMAL(9,7)',c:'Latitude',k:false},{n:'shape',t:'WKB_BLOB',c:'Spatial geometry',k:false},{n:'id',t:'INTEGER',c:'Id',k:false}]},
+  { name:'postcode_centroids_tbl', type:'table', group:'Geography/Lookup',
+    desc:'Postcode centroids for UK with full geography hierarchy (60 columns)',
+    cols:[{n:'pcd7',t:'VARCHAR',c:'Postcode (7 chars)',k:true},{n:'pcd8',t:'VARCHAR',c:'Postcode (8 chars)',k:true},{n:'pcds',t:'VARCHAR',c:'Postcode with space',k:true},{n:'lad25cd',t:'VARCHAR',c:'Local authority district code 2025',k:true},{n:'wd25cd',t:'VARCHAR',c:'Ward code 2025',k:false},{n:'lsoa21cd',t:'VARCHAR',c:'LSOA code 2021',k:true},{n:'msoa21cd',t:'VARCHAR',c:'MSOA code 2021',k:false},{n:'oa21cd',t:'VARCHAR',c:'Output area code 2021',k:false},{n:'lat',t:'DOUBLE',c:'Latitude',k:false},{n:'long',t:'DOUBLE',c:'Longitude',k:false},{n:'...',t:'(50 more)',c:'Additional geography codes (OA, MSOA, region, ward, NHS, etc.)',k:false}]},
+  { name:'open_uprn_lep_tbl', type:'table', group:'Geography/Lookup',
+    desc:'Open UPRN (Unique Property Reference Numbers) for the WECA LEP area',
+    cols:[{n:'uprn',t:'BIGINT',c:'Unique Property Reference Number',k:true},{n:'x_coordinate',t:'DECIMAL(10,2)',c:'Easting (BNG)',k:false},{n:'y_coordinate',t:'DECIMAL(10,2)',c:'Northing (BNG)',k:false},{n:'shape',t:'WKB_BLOB',c:'Spatial geometry',k:false},{n:'id',t:'INTEGER',c:'Id',k:false}]},
+  // DEPRIVATION
+  { name:'eng_lsoa_imd_tbl', type:'table', group:'Deprivation/Demographics',
+    desc:'Indices of Multiple Deprivation (IMD) 2019 by LSOA — England',
+    cols:[{n:'lsoa21_code',t:'VARCHAR',c:'LSOA code 2021',k:true},{n:'imd_decile',t:'BIGINT',c:'IMD decile (1=most deprived)',k:false},{n:'imd_rank',t:'BIGINT',c:'IMD rank',k:false},{n:'imd_score',t:'DOUBLE',c:'IMD score',k:false},{n:'income_decile',t:'BIGINT',c:'Income deprivation decile',k:false},{n:'employment_decile',t:'BIGINT',c:'Employment deprivation decile',k:false},{n:'education_decile',t:'BIGINT',c:'Education deprivation decile',k:false},{n:'health_decile',t:'BIGINT',c:'Health deprivation decile',k:false},{n:'crime_decile',t:'BIGINT',c:'Crime deprivation decile',k:false},{n:'housing_and_services_decile',t:'BIGINT',c:'Housing & services decile',k:false},{n:'environment_decile',t:'BIGINT',c:'Environment deprivation decile',k:false},{n:'income_rank',t:'BIGINT',c:'Income rank',k:false},{n:'employment_rank',t:'BIGINT',c:'Employment rank',k:false},{n:'education_rank',t:'BIGINT',c:'Education rank',k:false},{n:'health_rank',t:'BIGINT',c:'Health rank',k:false},{n:'crime_rank',t:'BIGINT',c:'Crime rank',k:false},{n:'housing_and_services_rank',t:'BIGINT',c:'Housing & services rank',k:false},{n:'environment_rank',t:'BIGINT',c:'Environment rank',k:false},{n:'income_score',t:'DOUBLE',c:'Income score',k:false},{n:'employment_score',t:'DOUBLE',c:'Employment score',k:false},{n:'education_score',t:'DOUBLE',c:'Education score',k:false},{n:'health_score',t:'DOUBLE',c:'Health score',k:false},{n:'crime_score',t:'DOUBLE',c:'Crime score',k:false},{n:'housing_and_services_score',t:'DOUBLE',c:'Housing & services score',k:false},{n:'environment_score',t:'DOUBLE',c:'Environment score',k:false}]},
+  { name:'uk_lsoa_tenure_tbl', type:'table', group:'Deprivation/Demographics',
+    desc:'UK LSOA housing tenure data — owner-occupied, social rented, private rented',
+    cols:[{n:'lsoa21_code',t:'VARCHAR',c:'LSOA code 2021',k:true},{n:'total_households',t:'BIGINT',c:'Total households in LSOA',k:false},{n:'tenure',t:'VARCHAR',c:'Tenure category',k:false},{n:'n',t:'BIGINT',c:'Number of households',k:false},{n:'prop',t:'DOUBLE',c:'Proportion of households',k:false}]},
+  // GHG
+  { name:'la_ghg_emissions_tbl', type:'table', group:'GHG Emissions',
+    desc:'Local authority GHG emissions in long/tidy format — one row per LA, year, sector, gas',
+    cols:[{n:'country',t:'VARCHAR',c:'Country',k:false},{n:'country_code',t:'VARCHAR',c:'Country code',k:false},{n:'region',t:'VARCHAR',c:'Region',k:false},{n:'region_code',t:'VARCHAR',c:'Region code',k:false},{n:'second_tier_authority',t:'VARCHAR',c:'Second tier authority',k:false},{n:'local_authority',t:'VARCHAR',c:'Local authority name',k:false},{n:'local_authority_code',t:'VARCHAR',c:'Local authority ONS code',k:true},{n:'calendar_year',t:'BIGINT',c:'Calendar year',k:false},{n:'la_ghg_sector',t:'VARCHAR',c:'GHG sector (Industry, Transport, etc.)',k:false},{n:'la_ghg_subsector',t:'VARCHAR',c:'GHG sub-sector',k:false},{n:'greenhouse_gas',t:'VARCHAR',c:'Greenhouse gas type',k:false},{n:'territorial_emissions_kt_co2e',t:'DOUBLE',c:'Territorial emissions (kt CO₂e)',k:false},{n:'emissions_within_the_scope_of_influence_of_las_kt_co2',t:'DOUBLE',c:'Scope of LA influence emissions (kt CO₂)',k:false},{n:'midyear_population_thousands',t:'DOUBLE',c:'Mid-year population (thousands)',k:false},{n:'area_km2',t:'DOUBLE',c:'Area (km²)',k:false}]},
+  { name:'la_ghg_emissions_wide_tbl', type:'table', group:'GHG Emissions',
+    desc:'Local authority GHG emissions in wide format — one row per LA per year',
+    cols:[{n:'regioncountry',t:'VARCHAR',c:'Region/country',k:false},{n:'second_tier_authority',t:'VARCHAR',c:'Second tier authority',k:false},{n:'local_authority',t:'VARCHAR',c:'Local authority name',k:false},{n:'local_authority_code',t:'VARCHAR',c:'Local authority ONS code',k:true},{n:'calendar_year',t:'DOUBLE',c:'Calendar year',k:false},{n:'industry_total',t:'DOUBLE',c:'Industry total emissions (kt CO₂e)',k:false},{n:'commercial_total',t:'DOUBLE',c:'Commercial total (kt CO₂e)',k:false},{n:'domestic_total',t:'DOUBLE',c:'Domestic total (kt CO₂e)',k:false},{n:'transport_total',t:'DOUBLE',c:'Transport total (kt CO₂e)',k:false},{n:'lulucf_net_emissions',t:'DOUBLE',c:'Land use net emissions (kt CO₂e)',k:false},{n:'agriculture_total',t:'DOUBLE',c:'Agriculture total (kt CO₂e)',k:false},{n:'waste_total',t:'DOUBLE',c:'Waste total (kt CO₂e)',k:false},{n:'grand_total',t:'DOUBLE',c:'Grand total emissions (kt CO₂e)',k:false},{n:'per_capita_emissions_t_co2e',t:'DOUBLE',c:'Per capita emissions (t CO₂e)',k:false},{n:'area_km2',t:'DOUBLE',c:'Area (km²)',k:false},{n:'industry_electricity',t:'DOUBLE',c:'Industry electricity emissions',k:false},{n:'industry_gas',t:'DOUBLE',c:'Industry gas emissions',k:false},{n:'domestic_electricity',t:'DOUBLE',c:'Domestic electricity emissions',k:false},{n:'domestic_gas',t:'DOUBLE',c:'Domestic gas emissions',k:false}]},
+  // EPC
+  { name:'raw_domestic_epc_certificates_tbl', type:'table', group:'EPC/Energy Performance',
+    desc:'Domestic Energy Performance Certificate (EPC) data from UK government register (93 columns)',
+    cols:[{n:'LMK_KEY',t:'VARCHAR',c:'Certificate identifier (unique)',k:true},{n:'POSTCODE',t:'VARCHAR',c:'Property postcode',k:true},{n:'UPRN',t:'BIGINT',c:'Unique Property Reference Number',k:true},{n:'BUILDING_REFERENCE_NUMBER',t:'VARCHAR',c:'Unique property identifier',k:false},{n:'ADDRESS1',t:'VARCHAR',c:'First line of address',k:false},{n:'ADDRESS2',t:'VARCHAR',c:'Second line of address',k:false},{n:'ADDRESS3',t:'VARCHAR',c:'Third line of address',k:false},{n:'CURRENT_ENERGY_RATING',t:'VARCHAR',c:'Current energy rating (A–G)',k:false},{n:'POTENTIAL_ENERGY_RATING',t:'VARCHAR',c:'Potential energy rating (A–G)',k:false},{n:'CURRENT_ENERGY_EFFICIENCY',t:'BIGINT',c:'Current energy efficiency score',k:false},{n:'POTENTIAL_ENERGY_EFFICIENCY',t:'BIGINT',c:'Potential energy efficiency score',k:false},{n:'PROPERTY_TYPE',t:'VARCHAR',c:'Property type (House, Flat, Maisonette, etc.)',k:false},{n:'BUILT_FORM',t:'VARCHAR',c:'Building form (Detached, Semi-Detached, etc.)',k:false},{n:'INSPECTION_DATE',t:'DATE',c:'Date of inspection',k:false},{n:'LOCAL_AUTHORITY',t:'VARCHAR',c:'Local authority ONS code',k:true},{n:'LODGEMENT_DATE',t:'DATE',c:'Date lodged on register',k:false},{n:'TRANSACTION_TYPE',t:'VARCHAR',c:'Transaction type (sale, rental, etc.)',k:false},{n:'CO2_EMISSIONS_CURRENT',t:'DOUBLE',c:'CO₂ emissions per year (t/year)',k:false},{n:'CO2_EMISS_CURR_PER_FLOOR_AREA',t:'DOUBLE',c:'CO₂ per floor area (kg/m²/year)',k:false},{n:'TOTAL_FLOOR_AREA',t:'DOUBLE',c:'Total floor area (m²)',k:false},{n:'TENURE',t:'VARCHAR',c:'Tenure type',k:false},{n:'CONSTRUCTION_AGE_BAND',t:'VARCHAR',c:'Age band of construction',k:false},{n:'MAIN_FUEL',t:'VARCHAR',c:'Main fuel type for central heating',k:false},{n:'HEATING_COST_CURRENT',t:'DOUBLE',c:'Current annual heating cost (GBP)',k:false},{n:'LODGEMENT_DATETIME',t:'TIMESTAMP',c:'Date and time lodged',k:false},{n:'REPORT_TYPE',t:'BIGINT',c:'Assessment type (100=RdSAP, 101=SAP)',k:false},{n:'...',t:'(67 more)',c:'Additional property features (glazing, insulation, lighting, etc.)',k:false}]},
+  { name:'raw_non_domestic_epc_certificates_tbl', type:'table', group:'EPC/Energy Performance',
+    desc:'Non-domestic EPC data from UK government register (41 columns)',
+    cols:[{n:'LMK_KEY',t:'VARCHAR',c:'Certificate identifier (unique)',k:true},{n:'POSTCODE',t:'VARCHAR',c:'Property postcode',k:true},{n:'UPRN',t:'BIGINT',c:'Unique Property Reference Number',k:true},{n:'BUILDING_REFERENCE_NUMBER',t:'VARCHAR',c:'Unique property identifier',k:false},{n:'ADDRESS1',t:'VARCHAR',c:'First line of address',k:false},{n:'ASSET_RATING',t:'BIGINT',c:'Energy performance asset rating (kg CO₂/m²)',k:false},{n:'ASSET_RATING_BAND',t:'VARCHAR',c:'Asset rating band (A+–G)',k:false},{n:'PROPERTY_TYPE',t:'VARCHAR',c:'Building type (planning use class)',k:false},{n:'INSPECTION_DATE',t:'DATE',c:'Date of inspection',k:false},{n:'LOCAL_AUTHORITY',t:'VARCHAR',c:'Local authority ONS code',k:true},{n:'LODGEMENT_DATE',t:'DATE',c:'Date lodged on register',k:false},{n:'FLOOR_AREA',t:'BIGINT',c:'Total floor area (m²)',k:false},{n:'BUILDING_EMISSIONS',t:'DOUBLE',c:'Annual CO₂ emissions (kg/m²)',k:false},{n:'MAIN_HEATING_FUEL',t:'VARCHAR',c:'Main heating fuel',k:false},{n:'TRANSACTION_TYPE',t:'VARCHAR',c:'Transaction type',k:false},{n:'STANDARD_EMISSIONS',t:'DOUBLE',c:'Standard emission rate (kg CO₂/m²/year)',k:false},{n:'PRIMARY_ENERGY_VALUE',t:'BIGINT',c:'Primary energy use (kWh/m²/year)',k:false}]},
+  // VIEWS
+  { name:'ca_boundaries_inc_ns_vw', type:'view', group:'Boundaries',
+    desc:'Combined Authority boundaries including North Somerset (derived from ca_boundaries_bgc_tbl)',
+    basedOn:['ca_boundaries_bgc_tbl'],
+    cols:[{n:'cauthcd',t:'VARCHAR',c:'Combined Authority code (ONS)',k:true},{n:'cauthnm',t:'VARCHAR',c:'Combined Authority name',k:false},{n:'geom',t:'GEOMETRY',c:'Spatial geometry (EPSG:4326 WGS84)',k:false}]},
+  { name:'ca_la_lookup_inc_ns_vw', type:'view', group:'Geography/Lookup',
+    desc:'CA to LA lookup including North Somerset — extends ca_la_lookup_tbl',
+    basedOn:['ca_la_lookup_tbl'],
+    cols:[{n:'ladcd',t:'VARCHAR',c:'Local Authority District code (ONS)',k:true},{n:'ladnm',t:'VARCHAR',c:'Local Authority District name',k:false},{n:'cauthcd',t:'VARCHAR',c:'Combined Authority code (ONS)',k:true},{n:'cauthnm',t:'VARCHAR',c:'Combined Authority name',k:false}]},
+  { name:'weca_lep_la_vw', type:'view', group:'Geography/Lookup',
+    desc:'WECA LEP local authorities — filtered view of the CA-to-LA lookup',
+    basedOn:['ca_la_lookup_inc_ns_vw'],
+    cols:[{n:'ladcd',t:'VARCHAR',c:'Local Authority District code (ONS)',k:true},{n:'ladnm',t:'VARCHAR',c:'Local Authority District name',k:false},{n:'cauthcd',t:'VARCHAR',c:'Combined Authority code (ONS)',k:true},{n:'cauthnm',t:'VARCHAR',c:'Combined Authority name',k:false}]},
+  { name:'ca_la_ghg_emissions_sub_sector_ods_vw', type:'view', group:'GHG Emissions',
+    desc:'GHG emissions by Combined Authority — joins la_ghg_emissions_tbl with CA lookup',
+    basedOn:['la_ghg_emissions_tbl','ca_la_lookup_inc_ns_vw'],
+    cols:[{n:'region_code',t:'VARCHAR',c:'Region code',k:false},{n:'local_authority',t:'VARCHAR',c:'Local authority name',k:false},{n:'local_authority_code',t:'VARCHAR',c:'Local authority ONS code',k:true},{n:'calendar_year',t:'BIGINT',c:'Calendar year',k:false},{n:'la_ghg_sector',t:'VARCHAR',c:'GHG sector',k:false},{n:'la_ghg_subsector',t:'VARCHAR',c:'GHG sub-sector',k:false},{n:'greenhouse_gas',t:'VARCHAR',c:'Greenhouse gas type',k:false},{n:'territorial_emissions_kt_co2e',t:'DOUBLE',c:'Territorial emissions (kt CO₂e)',k:false},{n:'emissions_within_the_scope_of_influence_of_las_kt_co2',t:'DOUBLE',c:'Scope of LA influence emissions',k:false},{n:'midyear_population_thousands',t:'DOUBLE',c:'Mid-year population (thousands)',k:false},{n:'area_km2',t:'DOUBLE',c:'Area (km²)',k:false},{n:'cauthcd',t:'VARCHAR',c:'Combined Authority code (ONS)',k:true},{n:'cauthnm',t:'VARCHAR',c:'Combined Authority name',k:false}]},
+  { name:'epc_domestic_vw', type:'view', group:'EPC/Energy Performance',
+    desc:'Domestic EPC with computed fields (adds construction year/epoch, tenure clean, lodgement date parts)',
+    basedOn:['raw_domestic_epc_certificates_tbl'],
+    cols:[{n:'LMK_KEY',t:'VARCHAR',c:'Certificate identifier',k:true},{n:'POSTCODE',t:'VARCHAR',c:'Property postcode',k:true},{n:'UPRN',t:'BIGINT',c:'Unique Property Reference Number',k:true},{n:'(all raw cols)',t:'(93 cols)',c:'All columns from raw_domestic_epc_certificates_tbl',k:false},{n:'NOMINAL_CONSTRUCTION_YEAR',t:'INTEGER',c:'Computed: nominal year from age band',k:false},{n:'CONSTRUCTION_EPOCH',t:'VARCHAR',c:'Computed: construction era label',k:false},{n:'TENURE_CLEAN',t:'VARCHAR',c:'Computed: cleaned tenure category',k:false},{n:'LODGEMENT_YEAR',t:'BIGINT',c:'Computed: year of lodgement',k:false},{n:'LODGEMENT_MONTH',t:'BIGINT',c:'Computed: month of lodgement',k:false},{n:'LODGEMENT_DAY',t:'BIGINT',c:'Computed: day of lodgement',k:false}]},
+  { name:'epc_domestic_lep_vw', type:'view', group:'EPC/Energy Performance',
+    desc:'Domestic EPC filtered to WECA LEP area — joins epc_domestic_vw with open_uprn_lep_tbl',
+    basedOn:['epc_domestic_vw','open_uprn_lep_tbl'],
+    cols:[{n:'LMK_KEY',t:'VARCHAR',c:'Certificate identifier',k:true},{n:'POSTCODE',t:'VARCHAR',c:'Property postcode',k:true},{n:'UPRN',t:'BIGINT',c:'Unique Property Reference Number',k:true},{n:'(all epc_domestic_vw cols)',t:'(99 cols)',c:'All columns from epc_domestic_vw',k:false},{n:'geo_point_2d',t:'VARCHAR',c:'Geographic point (lat,lon string)',k:false}]},
+  { name:'epc_non_domestic_lep_vw', type:'view', group:'EPC/Energy Performance',
+    desc:'Non-domestic EPC filtered to WECA LEP area — joins with open_uprn_lep_tbl',
+    basedOn:['raw_non_domestic_epc_certificates_tbl','open_uprn_lep_tbl'],
+    cols:[{n:'LMK_KEY',t:'VARCHAR',c:'Certificate identifier',k:true},{n:'POSTCODE',t:'VARCHAR',c:'Property postcode',k:true},{n:'UPRN',t:'BIGINT',c:'Unique Property Reference Number',k:true},{n:'(all raw non-domestic cols)',t:'(41 cols)',c:'All columns from raw_non_domestic_epc_certificates_tbl',k:false},{n:'geo_point_2d',t:'VARCHAR',c:'Geographic point (lat,lon string)',k:false}]},
+];
+
+// ── NODE POSITIONS ─────────────────────────────────────────────────────────
+
+const BASE_POSITIONS = {
+  // Boundaries cluster – top-left
+  'bdline_ua_lep_diss_tbl':    {x:90,  y:72},
+  'bdline_ua_lep_tbl':         {x:245, y:55},
+  'bdline_ua_weca_diss_tbl':   {x:90,  y:148},
+  'bdline_ward_lep_tbl':       {x:245, y:135},
+  'ca_boundaries_bgc_tbl':     {x:400, y:78},
+  'lsoa_2021_lep_tbl':         {x:395, y:175},
+  'ca_boundaries_inc_ns_vw':   {x:540, y:60},
+  // Geography/Lookup – centre
+  'boundary_lookup_tbl':       {x:295, y:335},
+  'ca_la_lookup_tbl':          {x:490, y:255},
+  'codepoint_open_lep_tbl':    {x:145, y:330},
+  'postcode_centroids_tbl':    {x:140, y:450},
+  'open_uprn_lep_tbl':         {x:615, y:390},
+  'ca_la_lookup_inc_ns_vw':    {x:640, y:258},
+  'weca_lep_la_vw':            {x:795, y:245},
+  // EPC – right
+  'raw_domestic_epc_certificates_tbl':    {x:740, y:115},
+  'raw_non_domestic_epc_certificates_tbl':{x:930, y:115},
+  'epc_domestic_vw':           {x:760, y:210},
+  'epc_domestic_lep_vw':       {x:755, y:325},
+  'epc_non_domestic_lep_vw':   {x:935, y:215},
+  // GHG – bottom-right
+  'la_ghg_emissions_tbl':      {x:575, y:495},
+  'la_ghg_emissions_wide_tbl': {x:760, y:490},
+  'ca_la_ghg_emissions_sub_sector_ods_vw':{x:640, y:600},
+  // Deprivation – bottom-left
+  'eng_lsoa_imd_tbl':          {x:140, y:570},
+  'uk_lsoa_tenure_tbl':        {x:300, y:565},
+};
+
+const positions = JSON.parse(JSON.stringify(BASE_POSITIONS));
+
+// ── EDGES [source, target, label, style] ──────────────────────────────────
+
+const EDGES = [
+  // lsoa21cd
+  ['boundary_lookup_tbl','lsoa_2021_lep_tbl','lsoa21cd','join'],
+  ['boundary_lookup_tbl','eng_lsoa_imd_tbl','lsoa21cd','join'],
+  ['boundary_lookup_tbl','uk_lsoa_tenure_tbl','lsoa21cd','join'],
+  ['boundary_lookup_tbl','postcode_centroids_tbl','pcd/lsoa','join'],
+  ['lsoa_2021_lep_tbl','eng_lsoa_imd_tbl','lsoa21cd','join'],
+  ['lsoa_2021_lep_tbl','uk_lsoa_tenure_tbl','lsoa21cd','join'],
+  // ladcd
+  ['boundary_lookup_tbl','ca_la_lookup_tbl','ladcd','join'],
+  ['ca_la_lookup_tbl','la_ghg_emissions_tbl','LAD_code','join'],
+  ['ca_la_lookup_tbl','la_ghg_emissions_wide_tbl','LAD_code','join'],
+  // CAUTH25CD
+  ['ca_boundaries_bgc_tbl','ca_la_lookup_tbl','CAUTH25CD','join'],
+  // UPRN
+  ['raw_domestic_epc_certificates_tbl','open_uprn_lep_tbl','UPRN','join'],
+  ['raw_non_domestic_epc_certificates_tbl','open_uprn_lep_tbl','UPRN','join'],
+  // Postcode
+  ['raw_domestic_epc_certificates_tbl','boundary_lookup_tbl','POSTCODE','join'],
+  ['raw_domestic_epc_certificates_tbl','codepoint_open_lep_tbl','POSTCODE','join'],
+  ['boundary_lookup_tbl','codepoint_open_lep_tbl','postcode','join'],
+  // View derivations
+  ['ca_boundaries_bgc_tbl','ca_boundaries_inc_ns_vw','derived','derive'],
+  ['ca_la_lookup_tbl','ca_la_lookup_inc_ns_vw','derived','derive'],
+  ['ca_la_lookup_inc_ns_vw','weca_lep_la_vw','derived','derive'],
+  ['ca_la_lookup_inc_ns_vw','ca_la_ghg_emissions_sub_sector_ods_vw','joined','derive'],
+  ['la_ghg_emissions_tbl','ca_la_ghg_emissions_sub_sector_ods_vw','joined','derive'],
+  ['raw_domestic_epc_certificates_tbl','epc_domestic_vw','derived','derive'],
+  ['epc_domestic_vw','epc_domestic_lep_vw','derived','derive'],
+  ['open_uprn_lep_tbl','epc_domestic_lep_vw','joined','derive'],
+  ['raw_non_domestic_epc_certificates_tbl','epc_non_domestic_lep_vw','derived','derive'],
+  ['open_uprn_lep_tbl','epc_non_domestic_lep_vw','joined','derive'],
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+
+const state = {
+  selected: null,
+  detailTab: 'columns',
+  colSearch: '',
+  sqlLimit: 100,
+  sqlKeysOnly: false,
+  sidebarSearch: '',
+  activeGroups: new Set(Object.keys(GROUPS)),
+  diagHighlight: null,
+};
+
+// ── SIDEBAR ───────────────────────────────────────────────────────────────
+
+function renderSidebar() {
+  const q = state.sidebarSearch.toLowerCase();
+  let html = '';
+  for (const g of Object.keys(GROUPS)) {
+    const items = SCHEMA.filter(s => s.group === g &&
+      (!q || s.name.toLowerCase().includes(q) || s.desc.toLowerCase().includes(q)));
+    if (!items.length) continue;
+    html += `<div class="group-header"><div class="group-dot" style="background:${GROUPS[g].color}"></div>${g}</div>`;
+    for (const item of items) {
+      const sel = state.selected === item.name ? ' selected' : '';
+      html += `<div class="tree-item${sel}" onclick="selectItem('${item.name}')">
+        <span class="item-icon">${item.type==='view'?'◈':'▤'}</span>
+        <span class="item-name" title="${item.name}">${item.name}</span>
+        ${item.type==='view'?'<span class="view-badge">VIEW</span>':''}
+      </div>`;
+    }
+  }
+  document.getElementById('sidebar-tree').innerHTML = html ||
+    '<div style="padding:20px;color:var(--text-dimmer);font-size:12px;text-align:center">No matches</div>';
+}
+
+function filterSidebar(v) { state.sidebarSearch = v; renderSidebar(); }
+
+// ── DETAIL PANEL ──────────────────────────────────────────────────────────
+
+function selectItem(name) {
+  state.selected = name; state.detailTab = 'columns'; state.colSearch = '';
+  renderSidebar(); renderDetail(); updatePrompt();
+}
+
+function renderDetail() {
+  const panel = document.getElementById('detail-panel');
+  if (!state.selected) {
+    panel.innerHTML = '<div class="empty-state"><div class="empty-icon">&#8862;</div><div>Select a table or view to explore its schema</div></div>';
+    return;
+  }
+  const item = SCHEMA.find(s => s.name === state.selected);
+  const g = GROUPS[item.group];
+  const keyCount = item.cols.filter(c => c.k).length;
+  const isView = item.type === 'view';
+
+  panel.innerHTML = `
+    <div class="detail-header">
+      <h2>${item.name} ${isView?'<span class="view-badge">VIEW</span>':''}
+        <span class="group-pill" style="background:${g.color}22;color:${g.color};border:1px solid ${g.color}44">${item.group}</span>
+      </h2>
+      <div class="desc">${item.desc}</div>
+      <div class="meta">
+        <span>&#128203; ${item.cols.length} columns</span>
+        ${keyCount?`<span>&#128273; ${keyCount} join key${keyCount>1?'s':''}</span>`:''}
+        ${isView&&item.basedOn?`<span>&#8658; ${item.basedOn.join(', ')}</span>`:''}
+      </div>
+    </div>
+    <div class="detail-tabs">
+      <button class="detail-tab ${state.detailTab==='columns'?'active':''}" onclick="switchDetailTab('columns')">Columns</button>
+      <button class="detail-tab ${state.detailTab==='sql'?'active':''}" onclick="switchDetailTab('sql')">SQL Snippet</button>
+    </div>
+    <div class="detail-content" id="detail-content">
+      ${state.detailTab==='columns' ? renderColsTab(item) : renderSqlTab(item)}
+    </div>`;
+}
+
+function renderColsTab(item) {
+  const q = state.colSearch.toLowerCase();
+  const cols = item.cols.filter(c => !q || c.n.toLowerCase().includes(q) || c.c.toLowerCase().includes(q) || c.t.toLowerCase().includes(q));
+  const rows = cols.map(c => `<tr>
+    <td><span class="col-name${c.k?' is-key':''}">${c.n}${c.k?'<span class="key-icon">&#128273;</span>':''}</span></td>
+    <td><span class="col-type">${c.t}</span></td>
+    <td><span class="col-comment">${c.c||'—'}</span></td>
+  </tr>`).join('');
+  return `<div class="columns-section">
+    <div class="col-search">
+      <input type="text" value="${state.colSearch}" placeholder="Filter columns by name, type, or description..." oninput="filterCols(this.value)">
+    </div>
+    <div class="col-table-wrap">
+      <table class="col-table">
+        <thead><tr><th style="width:215px">Column</th><th style="width:145px">Type</th><th>Description</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      ${!cols.length?'<div style="padding:20px;text-align:center;color:var(--text-dimmer);font-size:12px">No columns match</div>':''}
+    </div>
+  </div>`;
+}
+
+function filterCols(v) {
+  state.colSearch = v;
+  const item = SCHEMA.find(s => s.name === state.selected);
+  if (item) document.getElementById('detail-content').innerHTML = renderColsTab(item);
+}
+
+function renderSqlTab(item) {
+  return `<div class="sql-section">
+    <div class="sql-controls">
+      <label>LIMIT <input type="number" value="${state.sqlLimit}" min="1" max="10000" oninput="state.sqlLimit=parseInt(this.value)||100;refreshSql()"></label>
+      <label><input type="checkbox" ${state.sqlKeysOnly?'checked':''} onchange="state.sqlKeysOnly=this.checked;refreshSql()"> Key columns only</label>
+    </div>
+    <div class="sql-box" id="sql-box">${buildHighlightedSQL(item)}<button class="sql-copy-btn" onclick="copySql()">Copy SQL</button></div>
+  </div>`;
+}
+
+function buildSQL(item) {
+  const cols = (state.sqlKeysOnly ? item.cols.filter(c=>c.k) : item.cols)
+    .filter(c => !c.n.startsWith('(') && c.n !== '...');
+  const colStr = cols.length
+    ? cols.slice(0,18).map(c=>'  '+c.n).join(',\n') + (cols.length>18?',\n  -- (more columns...)':'')
+    : '  *';
+  return `-- Sample query: ${item.name}\nSELECT\n${colStr}\nFROM mca_data.${item.name}\nLIMIT ${state.sqlLimit};`;
+}
+
+function buildHighlightedSQL(item) {
+  return buildSQL(item)
+    .replace(/^(--[^\n]*)$/mg, '<span class="cmt">$1</span>')
+    .replace(/\b(SELECT|FROM|WHERE|JOIN|ON|GROUP BY|ORDER BY|LIMIT|LEFT JOIN|INNER JOIN|AS|HAVING|DISTINCT|COUNT|SUM|AVG|MAX|MIN)\b/g, '<span class="kw">$1</span>')
+    .replace(/mca_data\.(\w+)/g, 'mca_data.<span class="tbl">$1</span>')
+    .replace(/\b(\d+);/g, '<span class="num">$1</span>;');
+}
+
+function refreshSql() {
+  const item = SCHEMA.find(s=>s.name===state.selected);
+  if (!item) return;
+  document.getElementById('detail-content').innerHTML = renderSqlTab(item);
+}
+
+function copySql() {
+  const item = SCHEMA.find(s=>s.name===state.selected);
+  if (!item) return;
+  navigator.clipboard.writeText(buildSQL(item)).then(()=>{
+    const b = document.querySelector('.sql-copy-btn');
+    if (b){b.textContent='Copied!';setTimeout(()=>b.textContent='Copy SQL',1500);}
+  });
+}
+
+function switchDetailTab(tab) { state.detailTab = tab; renderDetail(); }
+
+// ── DIAGRAM ───────────────────────────────────────────────────────────────
+
+let zoom = 1, panX = 0, panY = 0;
+let dragging = null, dragOX = 0, dragOY = 0;
+let panning = false, panSX = 0, panSY = 0;
+
+function renderLegend() {
+  document.getElementById('diagram-legend').innerHTML = Object.entries(GROUPS).map(([g,info])=>`
+    <div class="legend-item" onclick="toggleGroup('${g}')">
+      <div class="legend-dot" style="background:${info.color};opacity:${state.activeGroups.has(g)?1:0.25}"></div>
+      <span style="opacity:${state.activeGroups.has(g)?1:0.35}">${g}</span>
+    </div>`).join('');
+}
+
+function toggleGroup(g) {
+  state.activeGroups.has(g) ? state.activeGroups.delete(g) : state.activeGroups.add(g);
+  renderLegend(); renderDiagram();
+}
+
+function renderDiagram() {
+  const svg = document.getElementById('diagram-svg');
+  const visible = new Set(SCHEMA.filter(s=>state.activeGroups.has(s.group)).map(s=>s.name));
+  const visEdges = EDGES.filter(([s,t])=>visible.has(s)&&visible.has(t));
+
+  const edgesSVG = visEdges.map(([s,t,label,style])=>{
+    const p1=positions[s], p2=positions[t];
+    if(!p1||!p2) return '';
+    const mx=(p1.x+p2.x)/2, my=(p1.y+p2.y)/2;
+    const isDeriv = style==='derive';
+    const stroke = isDeriv ? '#3d4466' : '#4b5563';
+    const dash = isDeriv ? '5,3' : 'none';
+    const sw = isDeriv ? 1 : 1.5;
+    const showLabel = label && label!=='derived';
+    return `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${stroke}" stroke-width="${sw}" stroke-dasharray="${dash}" opacity="0.8"/>
+      ${showLabel?`<text x="${mx}" y="${my-4}" fill="#4b5563" font-size="9" text-anchor="middle" font-family="monospace">${label}</text>`:''}`;
+  }).join('');
+
+  const nodesSVG = SCHEMA.filter(s=>visible.has(s.name)).map(item=>{
+    const pos=positions[item.name];
+    if(!pos) return '';
+    const g=GROUPS[item.group];
+    const isV=item.type==='view';
+    const isSel=state.diagHighlight===item.name;
+    const W=160, H=34, rx=isV?14:5;
+    const lbl = item.name.length>23 ? item.name.slice(0,21)+'…' : item.name;
+    const fill=isSel?g.color:`${g.color}1e`;
+    const stroke=isSel?g.color:`${g.color}80`;
+    const sw=isSel?2.5:1.5;
+    const tc=isSel?'#fff':g.color;
+    return `<g class="dnode" data-name="${item.name}"
+        onmousedown="startDrag(event,'${item.name}')" onclick="diagClick('${item.name}')"
+        onmouseenter="showTT(event,'${item.name}')" onmouseleave="hideTT()" style="cursor:pointer">
+      <rect x="${pos.x-W/2}" y="${pos.y-H/2}" width="${W}" height="${H}" rx="${rx}" ry="${rx}"
+        fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>
+      <text x="${pos.x}" y="${pos.y+4}" fill="${tc}" font-size="10" font-family="monospace"
+        text-anchor="middle" font-weight="${isSel?600:400}">${lbl}</text>
+      ${isV?`<text x="${pos.x+76}" y="${pos.y-14}" fill="${g.color}" font-size="8" text-anchor="middle">◈</text>`:''}
+    </g>`;
+  }).join('');
+
+  svg.innerHTML = `<g id="dtf" transform="translate(${panX},${panY}) scale(${zoom})">${edgesSVG}${nodesSVG}</g>`;
+  setupDiagEvents();
+}
+
+function diagClick(name) {
+  if (state.diagHighlight===name) { state.diagHighlight=null; }
+  else { state.diagHighlight=name; state.selected=name; renderSidebar(); renderDetail(); updatePrompt(); }
+  renderDiagram();
+}
+
+function startDrag(e, name) {
+  e.stopPropagation();
+  dragging = name;
+  const r = document.getElementById('diagram-svg').getBoundingClientRect();
+  dragOX = (e.clientX-r.left)/zoom - panX/zoom - positions[name].x;
+  dragOY = (e.clientY-r.top)/zoom - panY/zoom - positions[name].y;
+}
+
+function showTT(e, name) {
+  const item = SCHEMA.find(s=>s.name===name);
+  if (!item) return;
+  const tt = document.getElementById('node-tooltip');
+  const keys = item.cols.filter(c=>c.k).map(c=>c.n).join(', ');
+  tt.innerHTML = `<div class="tt-name">${item.name}</div>
+    <div class="tt-desc">${item.desc}</div>
+    <div class="tt-cols">${item.cols.length} cols${keys?` · Keys: ${keys}`:''}</div>
+    ${item.basedOn?`<div class="tt-cols">Based on: ${item.basedOn.join(', ')}</div>`:''}`;
+  tt.style.display='block';
+  const cr = document.getElementById('svg-container').getBoundingClientRect();
+  let lx=e.clientX-cr.left+14, ly=e.clientY-cr.top+12;
+  if (lx+240>cr.width) lx=e.clientX-cr.left-250;
+  tt.style.left=lx+'px'; tt.style.top=ly+'px';
+}
+function hideTT() { document.getElementById('node-tooltip').style.display='none'; }
+
+function setupDiagEvents() {
+  const svg = document.getElementById('diagram-svg');
+  svg.onmousemove = (e) => {
+    const r = svg.getBoundingClientRect();
+    if (dragging) {
+      positions[dragging].x = (e.clientX-r.left)/zoom - panX/zoom - dragOX;
+      positions[dragging].y = (e.clientY-r.top)/zoom - panY/zoom - dragOY;
+      renderDiagram();
+    } else if (panning) {
+      panX = e.clientX - panSX;
+      panY = e.clientY - panSY;
+      document.getElementById('dtf').setAttribute('transform',`translate(${panX},${panY}) scale(${zoom})`);
+    }
+  };
+  svg.onmousedown = (e) => {
+    if (e.target===svg||e.target.tagName.toLowerCase()==='svg') {
+      panning=true; panSX=e.clientX-panX; panSY=e.clientY-panY;
+    }
+  };
+  svg.onmouseup = () => { dragging=null; panning=false; };
+  svg.onmouseleave = () => { dragging=null; panning=false; };
+  svg.onwheel = (e) => {
+    e.preventDefault();
+    zoom = Math.max(0.25, Math.min(3, zoom * (e.deltaY<0?1.1:0.9)));
+    document.getElementById('dtf')?.setAttribute('transform',`translate(${panX},${panY}) scale(${zoom})`);
+  };
+}
+
+// ── PROMPT ────────────────────────────────────────────────────────────────
+
+function updatePrompt() {
+  const el = document.getElementById('prompt-text');
+  if (!state.selected) { el.textContent='Select a table or view to generate a query prompt.'; return; }
+  const item = SCHEMA.find(s=>s.name===state.selected);
+  const keys = item.cols.filter(c=>c.k&&!c.n.startsWith('(')).map(c=>c.n);
+  const nums = item.cols.filter(c=>['DOUBLE','BIGINT','INTEGER','DECIMAL'].some(t=>c.t.includes(t))&&!c.k&&!c.n.startsWith('(')).slice(0,3).map(c=>c.n);
+  let txt = `Query the ${item.type} \`${item.name}\` from the \`mca_data\` database (MotherDuck/DuckDB). ${item.desc}.`;
+  if (keys.length) txt += ` Key join columns: ${keys.join(', ')}.`;
+  if (item.basedOn) txt += ` This view is derived from: ${item.basedOn.join(', ')}.`;
+  if (nums.length) txt += ` Numeric fields include: ${nums.join(', ')}.`;
+  el.textContent = txt;
+}
+
+function copyPrompt() {
+  navigator.clipboard.writeText(document.getElementById('prompt-text').textContent).then(()=>{
+    const b=document.querySelector('.copy-prompt-btn');
+    b.textContent='Copied!'; setTimeout(()=>b.textContent='Copy',1500);
+  });
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────
+
+function switchMainTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  if (tab==='diagram') { renderLegend(); renderDiagram(); }
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+renderSidebar();
+updatePrompt();
+</script>
+</body>
+</html>
