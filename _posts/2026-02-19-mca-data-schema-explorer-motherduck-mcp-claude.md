@@ -1,22 +1,30 @@
 ---
-title: "Building an Interactive ERD for a MotherDuck Database with Claude MCP"
+title: "Building an interactive ERD for a MotherDuck database with Claude MCP"
+date: 2026-02-19
+categories: [SQL]
+tags:
+- duckdb
+- motherduck
+- mcp
+- claude
+- data-engineering
 ---
 
-**TLDR; By wiring up the MotherDuck MCP server to Claude Code, I was able to introspect a whole database schema in seconds and auto-generate an interactive schema explorer — complete with a relationship diagram, column browser, and SQL snippet generator — without writing a line of code manually.**
+**TLDR; I wired up the MotherDuck MCP server to Claude Code, pointed it at a 24-object database, and got back a working interactive schema explorer without writing any code myself.**
 
-## The Setup
+## The setup
 
-Our `mca_data` database on [MotherDuck](https://motherduck.com) holds the core data assets for the West of England Combined Authority (WECA): EPC certificates, greenhouse gas emissions, deprivation indices, housing tenure, boundary geometries, and the geography lookup tables that tie them all together. It has grown organically and contains 17 tables and 7 views across 5 thematic domains.
+Our `mca_data` database on [MotherDuck](https://motherduck.com) holds the core data assets for the environmental analysis in WECA: EPC certificates, greenhouse gas emissions, deprivation indices, housing tenure, boundary geometries, and the geography lookup tables that tie them all together. It has grown organically and contains 17 tables and 7 views across 5 thematic domains.
 
 I always struggle to remember precisely what's in it and what the tables and views are called. There was no ERD, no central schema reference. Just column comments and the knowledge in people's heads.
 
 I wanted to fix that without spending an afternoon building a documentation site.
 
-## The MotherDuck MCP Server
+## The MotherDuck MCP server
 
-[Model Context Protocol (MCP)](https://docs.anthropic.com/en/docs/agents-and-tools/mcp) is Anthropic's open standard for connecting AI assistants to external tools and data sources. MotherDuck ships an MCP server that exposes your cloud DuckDB databases directly to Claude — no copy-pasting connection strings, no exporting schemas to text files.
+[Model Context Protocol (MCP)](https://docs.anthropic.com/en/docs/agents-and-tools/mcp) is Anthropic's open standard for connecting AI assistants to external tools and data sources. MotherDuck ships an MCP server that exposes your cloud DuckDB databases directly to Claude, so there's no copy-pasting connection strings or exporting schemas to text files.
 
-With the server configured in `~/.claude/claude_desktop_config.json`, Claude gains a set of database tools it can call autonomously:
+Once the server is configured in `~/.claude/claude_desktop_config.json`, Claude can call these database tools on its own:
 
 | Tool | What it does |
 |------|-------------|
@@ -24,13 +32,13 @@ With the server configured in `~/.claude/claude_desktop_config.json`, Claude gai
 | `list_tables` | List tables and views (with comments) for a database |
 | `list_columns` | Get column names, types, and comments for a table |
 | `query` | Execute read-only SQL against MotherDuck |
-| `search_catalog` | Fuzzy-search across the full object catalog |
+| `search_catalog` | Fuzzy-search across the full object catalogue |
 
-## The Workflow
+## The workflow
 
-The session followed a straightforward pattern that would have taken hours manually (contrast to the [workflow](https://stevecrawshaw.github.io/sql/2025/05/30/Workflow-for-diagrams-with-ai.html) I used previously):
+The whole thing took one prompt and a few minutes. Compare that with the [manual workflow](https://stevecrawshaw.github.io/sql/2025/05/30/Workflow-for-diagrams-with-ai.html) I used previously which involved testing mermaid diagrams, draw.io and piping through LLMs.
 
-**One shot prompt to make an interactive ERD**
+**1. One prompt**
 
 ```
 use the motherduck MCP to connect to mca_data database.
@@ -38,27 +46,27 @@ Introspect the database schema and create a playground to
 help me explore the tables and views and their relationships.
 ```
 
-Claude called `list_tables` once, then fanned out to 24 parallel `list_columns` calls — one for each table and view — collecting types, comments, and key column information simultaneously.
+Claude called `list_tables` once, then fanned out to 24 parallel `list_columns` calls, one per table and view, pulling back types, comments, and key column names in one go.
 
 **2. Relationship inference from shared key columns**
 
-With all the column metadata in hand, Claude identified join relationships by matching key column names across tables:
+With the column metadata collected, Claude matched key column names across tables to infer joins:
 
-- `lsoa21cd` / `lsoa21_code` — connecting boundary tables, IMD data, tenure data, postcode lookups
-- `ladcd` / `local_authority_code` — linking the CA-to-LA hierarchy to GHG emissions tables
-- `CAUTH25CD` / `cauthcd` — joining authority boundary tables to the lookup views
-- `UPRN` — connecting EPC certificate tables to the property reference dataset
-- `POSTCODE` — threading EPC data through postcode and boundary lookups
+- `lsoa21cd` / `lsoa21_code` connects boundary tables, IMD data, tenure data, and postcode lookups
+- `ladcd` / `local_authority_code` links the CA-to-LA hierarchy to GHG emissions tables
+- `CAUTH25CD` / `cauthcd` joins authority boundary tables to the lookup views
+- `UPRN` connects EPC certificate tables to the property reference dataset
+- `POSTCODE` threads EPC data through postcode and boundary lookups
 
 View derivation chains were also mapped: `raw_domestic_epc_certificates_tbl` → `epc_domestic_vw` → `epc_domestic_lep_vw`, and so on.
 
-**3. Auto-generated playground**
+**3. The playground**
 
-All of that schema knowledge was compiled into a single self-contained HTML playground (no external dependencies, no build step) using the [playground skill](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/playground). The result is embedded below.
+Claude rolled all of that into a single self-contained HTML file (no external dependencies, no build step) using the [playground skill](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/playground). The result is embedded below.
 
-## The Schema Explorer
+## The schema explorer
 
-Explore the full `mca_data` schema interactively:
+Have a poke around the `mca_data` schema:
 
 <div style="border: 1px solid #2e3248; border-radius: 8px; overflow: hidden; margin: 1.5rem 0;">
   <iframe
@@ -76,6 +84,7 @@ Explore the full `mca_data` schema interactively:
 The playground has two main sections:
 
 **Schema Browser**
+
 - All 24 objects listed in the left sidebar, grouped by theme (Boundaries, Geography/Lookup, EPC/Energy Performance, GHG Emissions, Deprivation/Demographics)
 - Views are distinguished from base tables with a teal badge
 - Clicking any item shows its description, column count, and join keys in the right panel
@@ -83,15 +92,16 @@ The playground has two main sections:
 - The **SQL Snippet tab** auto-generates a `SELECT` query with configurable `LIMIT` and a "key columns only" toggle
 
 **Relationship Diagram**
+
 - A draggable SVG node graph with all 24 objects
 - Solid lines = join relationships, labelled with the connecting key column
 - Dashed lines = view derivation / composition relationships
 - Legend lets you toggle theme groups on/off to reduce clutter
 - Click a node to select it and sync back to the Schema Browser
 
-## Database Structure at a Glance
+## Database structure
 
-Here's the full object inventory:
+Here's what's in the database:
 
 ### Boundaries (6 tables, 1 view)
 
@@ -142,9 +152,9 @@ Here's the full object inventory:
 | `eng_lsoa_imd_tbl` | table | IMD 2019 — deciles, ranks, scores for all domains |
 | `uk_lsoa_tenure_tbl` | table | LSOA housing tenure breakdown |
 
-## Key Join Patterns
+## Key join patterns
 
-For anyone querying this database, these are the joins you'll reach for most often:
+If you're querying this database, these are the joins you'll use most often:
 
 ```sql
 -- Enrich LSOA-level analysis with deprivation data
@@ -176,17 +186,13 @@ GROUP BY ALL
 ORDER BY calendar_year, total_kt_co2e DESC;
 ```
 
-## What This Demonstrates
+## What I learned
 
-A few things stood out from this session:
+The MCP server made the introspection bit almost boring. The whole schema, 24 objects, roughly 300 columns, came back in a few seconds via parallel tool calls. No `SHOW TABLES` loops, no schema dump files to keep up to date.
 
-**MCP makes database introspection trivial.** The entire schema — 24 objects, ~300 columns — was fetched in a few seconds with parallel tool calls. No manual `SHOW TABLES` sessions, no schema dump files to maintain.
+I was surprised how much difference column comments made. Because the `mca_data` tables have decent `COMMENT ON COLUMN` metadata in DuckDB, Claude could figure out that `lsoa21_code` in `eng_lsoa_imd_tbl` is the same key as `lsoa21cd` in `boundary_lookup_tbl`, even though the names don't match. Without those comments it would have been guessing.
 
-**Column comments pay dividends.** Because the `mca_data` tables have well-maintained column comments in DuckDB (set via `COMMENT ON COLUMN`), Claude could surface not just names and types but actual meaning — distinguishing, for example, that `lsoa21_code` in `eng_lsoa_imd_tbl` is the same key as `lsoa21cd` in `boundary_lookup_tbl` even though the names differ.
-
-**The playground skill is a force multiplier.** Rather than describing the schema in prose, the entire introspection output was compiled into an interactive tool that anyone on the team can use. One session → living documentation.
-
-**Self-contained HTML is underrated for internal tooling.** No server, no build pipeline, no dependencies. The explorer is a single file that can be emailed, committed to a repo, or hosted on GitHub Pages.
+The playground skill turned what could have been a wall of prose into something the rest of the team can actually click around. One prompt, one HTML file, no build pipeline. You can email it, commit it, or stick it on GitHub Pages.
 
 ## Resources
 
