@@ -8,6 +8,8 @@ tags:
 - open-data
 - cli
 - skills
+- opendatasoft
+- huwise
 ---
 
 **TLDR; I turned WECA's Open Data portal API into a Claude Code skill using [mcp2cli](https://github.com/knowsuchagency/mcp2cli), scored a Grade D on the first attempt, and iterated until it actually worked properly. The skill lets Claude query 122 public datasets from the command line without an MCP server running.**
@@ -22,11 +24,9 @@ I wanted Claude Code to query this portal directly. The obvious route is an MCP 
 
 [mcp2cli](https://github.com/knowsuchagency/mcp2cli) does something simpler. It gives the LLM a CLI it can shell out to. The model runs `--list` to see what's available, `--help` to check parameters, and then executes commands with flags. Same way you or I would use any CLI.
 
-The token difference is hard to ignore. A 30-tool MCP server burns ~3,600 tokens per turn just on schema overhead. mcp2cli's system prompt is 67 tokens. Over a 15-turn conversation using 5 tools, that's 96% fewer tokens. The mcp2cli README has [detailed benchmarks](https://github.com/knowsuchagency/mcp2cli#the-numbers-how-much-context-do-you-actually-save) if you want the full breakdown.
+The token difference is significant. A 30-tool MCP server burns ~3,600 tokens per turn just on schema overhead. mcp2cli's system prompt is 67 tokens. Over a 15-turn conversation using 5 tools, that's 96% fewer tokens. The mcp2cli README has [detailed benchmarks](https://github.com/knowsuchagency/mcp2cli#the-numbers-how-much-context-do-you-actually-save) if you want the full breakdown.
 
-Token use is abviously important, but the overhead of setting up MCP on a per - project basis, or remembering to disable a global implementation is not ideal. A skill and CLI appproach is just more lightweight.
-
-Beyond tokens: no server process to keep alive, works with any LLM that can run shell commands, and when the API adds new endpoints they just appear on the next call. No rebuild, no codegen.
+Token use is abviously important, but the overhead of setting up MCP on a per - project basis, or remembering to disable a global implementation is not ideal. A skill and CLI appproach is just more lightweight. there is therefore no server process to keep alive and the cli \ skills approach works with any LLM that can run shell commands, and when the API adds new endpoints they just appear on the next call. No rebuild, no codegen.
 
 ## Generating the skill
 
@@ -106,15 +106,24 @@ uvx mcp2cli --spec https://opendata.westofengland-ca.gov.uk/api/explore/v2.1/swa
 
 Transport came back at 2,172 kt CO2e, Domestic at 1,472, and LULUCF at -40 (carbon sequestration, so negative). Public API, no auth, no server process.
 
+## Further battle - testing and improvement
+
+More testing of the skill revealed additional problems. Firstly when asking for an export in Excel format I noticed that Claude tried to invoke python to generate xlsx from the download. It wasn't checking the exports formats. Secondly, when it did use the right endpoint, the download was corrupted because the UTF8 instruction in the skill was being applied to the binary file in error. Further skill polishing was needed.
+
+Skill updated with four changes:
+
+1. List the export formats explicitly
+2. New NEVER rule: don't use PYTHONUTF8=1 for binary formats (xlsx, parquet, shp, fgb, gpx, ov2)
+3. Export examples split into binary (no prefix) and text (with prefix) sections
+4. Windows note and tips updated to match
+
 ## The skill
 
 Full SKILL.md is on [GitHub as a Gist](https://gist.github.com/stevecrawshaw/ff29a73158d08aa8c037b648117833d6). To use it, copy to `~/.claude/skills/weca-opendata/SKILL.md` and invoke with `/weca-opendata` in Claude Code. You could of course modify it to work for any other [Huwise open data portal](https://www.huwise.com/en/data-marketplace-solution/) quite simply - and Huwise have their own [MCP and AII agents](https://www.huwise.com/en/mcp-ai-agents/) offering.
 
-It covers dataset discovery, schema inspection, the "before querying" checklist, six anti-patterns, record queries with filtering and aggregation, facet browsing, export workflows for CSV and Parquet, ODSQL syntax, and eight commonly used datasets.
+It covers dataset discovery, schema inspection, the "before querying" checklist, six anti-patterns, record queries with filtering and aggregation, facet browsing, export workflows for all formats, ODSQL syntax, and eight commonly used datasets.
 
-## What I'd do differently
-
-The auto-generated skill was a reasonable starting point but I spent more time fixing it than I would have spent writing it from scratch. The value of generation is the structure and the boilerplate, not the content. Next time I'd generate the skeleton and immediately start layering in domain knowledge rather than treating the output as near-finished.
+## Learnings
 
 The skill-judge evaluation was worth doing. It caught the missing anti-patterns and the knowledge-delta problem (too much reference, not enough expertise). But the operational testing caught different things: the export command gap, the geo_shape bloat, Windows encoding issues. Both were needed. Desk review and live testing find different classes of problem.
 
@@ -125,5 +134,6 @@ There's an ongoing [debate](https://www.reddit.com/r/mcp/comments/1rrviz4/perple
 - [mcp2cli](https://github.com/knowsuchagency/mcp2cli)
 - [WECA Open Data portal](https://opendata.westofengland-ca.gov.uk)
 - [weca-opendata SKILL.md](https://gist.github.com/stevecrawshaw/ff29a73158d08aa8c037b648117833d6)
-- [OpenDataSoft Explore API v2.1](https://help.opendatasoft.com/apis/ods-explore-v2/)
+- [Huwise OpenDataSoft Explore API v2.1](https://help.opendatasoft.com/apis/ods-explore-v2/)
 - [Claude Code skills documentation](https://docs.anthropic.com/en/docs/claude-code/skills)
+- [Huwise MCP and AII agents](https://www.huwise.com/en/mcp-ai-agents/)
