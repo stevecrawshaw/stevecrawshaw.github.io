@@ -117,6 +117,8 @@ Skill updated with four changes:
 3. Export examples split into binary (no prefix) and text (with prefix) sections
 4. Windows note and tips updated to match
 
+I continued to iterate and actually picked up an encoding bug which was corrupting some binary exports. I issued a [PR](https://github.com/knowsuchagency/mcp2cli/pull/16) which was fixed very quickly by the mcp2cli maintainer. I also noticed that Claude was reverting to quite verbose python scripting to parse json, so made an addition to the skill to prefer using `jq` for json parsing. A final pass of the `skill-judge` skill reduced bloat and optimised the skill.
+
 ## The skill
 
 Full SKILL.md is on [GitHub as a Gist](https://gist.github.com/stevecrawshaw/ff29a73158d08aa8c037b648117833d6). To use it, copy to `~/.claude/skills/weca-opendata/SKILL.md` and invoke with `/weca-opendata` in Claude Code. You could of course modify it to work for any other [Huwise open data portal](https://www.huwise.com/en/data-marketplace-solution/) quite simply - and Huwise have their own [MCP and AII agents](https://www.huwise.com/en/mcp-ai-agents/) offering.
@@ -127,7 +129,7 @@ It covers dataset discovery, schema inspection, the "before querying" checklist,
 
 The skill-judge evaluation was worth doing. It caught the missing anti-patterns and the knowledge-delta problem (too much reference, not enough expertise). But the operational testing caught different things: the export command gap, the geo_shape bloat, Windows encoding issues. Both were needed. Desk review and live testing find different classes of problem.
 
-There's an ongoing [debate](https://www.reddit.com/r/mcp/comments/1rrviz4/perplexity_drops_mcp_cloudflare_explains_why_mcp/) about the value of the MCP approach vs. more lightweiight approaches to agent tools - don't know whether CLI-based tool access will hold up as APIs get more complex. For a public read-only portal with no auth, it's ideal. I'd be less confident about APIs that need OAuth flows or streaming responses. But for the analytical query use case, the trade-off (slightly more latency on first call, no streaming) is easy to accept.
+There's an ongoing [debate](https://www.reddit.com/r/mcp/comments/1rrviz4/perplexity_drops_mcp_cloudflare_explains_why_mcp/) about the value of the MCP approach vs. more lightweight approaches to agent tools. I don't know whether CLI-based tool access will hold up as APIs get more complex. For a public read-only portal with no auth, it's ideal. I'd be less confident about APIs that need OAuth flows or streaming responses. But for the analytical query use case, the trade-off (slightly more latency on first call, no streaming) is easy to accept.
 
 ## Resources
 
@@ -137,3 +139,9 @@ There's an ongoing [debate](https://www.reddit.com/r/mcp/comments/1rrviz4/perple
 - [Huwise OpenDataSoft Explore API v2.1](https://help.opendatasoft.com/apis/ods-explore-v2/)
 - [Claude Code skills documentation](https://docs.anthropic.com/en/docs/claude-code/skills)
 - [Huwise MCP and AII agents](https://www.huwise.com/en/mcp-ai-agents/)
+
+## Video
+
+There's a brief video demonstrating use and testing of the skill here.
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/BPTjTWpOkrU?si=UuZ_5HqOtxPtRPcg&amp;start=4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
