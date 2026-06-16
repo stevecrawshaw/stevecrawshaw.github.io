@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 2 · Your Workflow</title>
+  <style>
+    :root {
+      --green:       #2e7d32;
+      --green-med:   #388e3c;
+      --green-light: #c8e6c9;
+      --green-bg:    #f1f8e9;
+      --amber:       #e65100;
+      --amber-light: #fff3e0;
+      --red:         #b71c1c;
+      --red-light:   #ffebee;
+      --bg:          #fafaf8;
+      --card:        #ffffff;
+      --text:        #1a1a1a;
+      --muted:       #666;
+      --border:      #e0e0e0;
+      --shadow:      0 2px 10px rgba(0,0,0,0.07);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 18px;
+      line-height: 1.8;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 5rem;
+      background: var(--bg);
+      color: var(--text);
+    }
+    h1  { font-size: 2rem; line-height: 1.2; color: var(--green); margin-bottom: .3rem; }
+    h2  { font-size: 1.3rem; color: var(--green-med); border-bottom: 2px solid var(--green-light);
+          padding-bottom: .3rem; margin: 2.5rem 0 .8rem; }
+    h3  { font-size: 1.05rem; margin: 1.5rem 0 .5rem; }
+    p   { margin-bottom: 1rem; }
+    ul, ol { padding-left: 1.6rem; margin-bottom: 1rem; }
+    li  { margin-bottom: .35rem; }
+    strong { color: var(--green); }
+    .subtitle  { font-size: 1rem; color: var(--muted); font-style: italic; margin-bottom: .4rem; }
+    .meta      { font-family: 'Helvetica Neue', Helvetica, sans-serif; font-size: .8rem;
+                 text-transform: uppercase; letter-spacing: .08em; color: var(--green); font-weight: 700; }
+    .time      { font-family: 'Helvetica Neue', Helvetica, sans-serif; font-size: .85rem;
+                 color: var(--muted); margin-top: .3rem; }
+    code { font-family: 'SF Mono','Fira Code','Consolas',monospace; font-size: .83em;
+           background: #f0f0f0; border-radius: 3px; padding: .1em .4em; }
+    pre  { font-family: 'SF Mono','Fira Code','Consolas',monospace; font-size: .82em;
+           background: #f5f5f5; border-left: 3px solid var(--green); border-radius: 0 5px 5px 0;
+           padding: 1rem 1.2rem; overflow-x: auto; margin: 1rem 0; line-height: 1.6; }
+    pre code { background: none; padding: 0; font-size: inherit; }
+    .callout {
+      border-left: 4px solid var(--green);
+      background: var(--green-bg);
+      border-radius: 0 6px 6px 0;
+      padding: .9rem 1.2rem;
+      margin: 1.5rem 0;
+    }
+    .callout.warn { border-color: var(--amber); background: var(--amber-light); }
+    .callout.danger { border-color: var(--red); background: var(--red-light); }
+    .callout p:last-child { margin-bottom: 0; }
+    .callout-label {
+      font-family: 'Helvetica Neue', sans-serif;
+      font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em;
+      color: var(--green); margin-bottom: .3rem;
+    }
+    .callout.warn .callout-label  { color: var(--amber); }
+    .callout.danger .callout-label { color: var(--red); }
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+    /* ── Workflow pipeline ── */
+    .pipeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin: 1.5rem 0;
+    }
+    .pipe-step {
+      display: flex;
+      gap: 1rem;
+      align-items: stretch;
+    }
+    .pipe-connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 2.2rem;
+      flex-shrink: 0;
+    }
+    .pipe-num {
+      width: 2.2rem; height: 2.2rem;
+      background: var(--green);
+      color: white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Helvetica Neue', sans-serif;
+      font-size: .85rem; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .pipe-line {
+      width: 2px;
+      background: var(--green-light);
+      flex: 1;
+      margin: 0 auto;
+      min-height: .8rem;
+    }
+    .pipe-body {
+      flex: 1;
+      padding: .6rem 0 1.4rem;
+    }
+    .pipe-body h3 { margin: 0 0 .3rem; font-size: 1rem; color: var(--text); }
+    .pipe-body p  { margin: 0; font-size: .92rem; color: var(--muted); }
+    .pipe-body pre { margin: .5rem 0 0; }
+    .pipe-step:last-child .pipe-line { display: none; }
+    .pipe-step:last-child .pipe-body { padding-bottom: 0; }
+
+    /* ── Branch naming examples ── */
+    .example-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .5rem;
+      margin: 1rem 0;
+    }
+    @media (max-width: 480px) { .example-grid { grid-template-columns: 1fr; } }
+    .eg-card {
+      border-radius: 6px;
+      padding: .6rem .9rem;
+      font-family: 'SF Mono','Fira Code',monospace;
+      font-size: .82rem;
+    }
+    .eg-card.good { background: #e8f5e9; border: 1px solid #a5d6a7; color: #1b5e20; }
+    .eg-card.bad  { background: var(--red-light); border: 1px solid #ef9a9a; color: var(--red); }
+    .eg-label { font-family: 'Helvetica Neue', sans-serif; font-size: .7rem;
+                font-weight: 700; text-transform: uppercase; letter-spacing: .07em;
+                margin-bottom: .2rem; }
+
+    /* ── Never commit table ── */
+    table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: .9rem; }
+    th { background: var(--green); color: white; padding: .6rem .8rem; text-align: left;
+         font-family: 'Helvetica Neue', sans-serif; font-size: .8rem; }
+    td { padding: .6rem .8rem; border-bottom: 1px solid var(--border); }
+    tr:nth-child(even) td { background: #f9f9f9; }
+    td code { font-size: .78rem; }
+
+    /* ── Quiz ── */
+    .quiz-wrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      box-shadow: var(--shadow);
+    }
+    .quiz-wrap > h2 { margin-top: 0; }
+    .question { margin-bottom: 2rem; }
+    .question:last-of-type { margin-bottom: .5rem; }
+    .q-text { font-weight: 700; margin-bottom: .8rem; font-size: 1rem; }
+    .options { display: flex; flex-direction: column; gap: .45rem; }
+    .opt {
+      background: white; border: 2px solid var(--border); border-radius: 6px;
+      padding: .65rem 1rem; text-align: left; cursor: pointer;
+      font-family: Georgia, serif; font-size: .92rem; line-height: 1.5;
+      transition: border-color .15s, background .15s;
+    }
+    .opt:hover:not([disabled]) { border-color: var(--green-med); background: var(--green-bg); }
+    .opt.correct  { border-color: var(--green); background: #e8f5e9; color: #1b5e20; }
+    .opt.wrong    { border-color: #c62828; background: var(--red-light); color: var(--red); }
+    .opt[disabled] { cursor: default; }
+    .explanation {
+      display: none; margin-top: .7rem; padding: .7rem 1rem;
+      background: #f9f9f9; border-radius: 6px; border-left: 3px solid var(--green);
+      font-size: .92rem; line-height: 1.55;
+    }
+    .score-box {
+      display: none; text-align: center; padding: 1rem; margin-top: 1.5rem;
+      background: var(--green-bg); border-radius: 8px;
+      font-family: 'Helvetica Neue', sans-serif; font-size: 1.05rem;
+      color: var(--green); font-weight: 600;
+    }
+
+    /* ── Order exercise ── */
+    .order-exercise {
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 1.5rem; margin: 2rem 0; box-shadow: var(--shadow);
+    }
+    .order-exercise h3 { margin-top: 0; color: var(--green-med); }
+    .order-items { list-style: none; padding: 0; margin: 1rem 0; }
+    .order-items li {
+      background: #f9f9f9; border: 2px solid var(--border); border-radius: 6px;
+      padding: .55rem .9rem; margin-bottom: .45rem; cursor: grab;
+      font-size: .9rem; display: flex; align-items: center; gap: .7rem;
+      transition: background .15s, border-color .15s;
+      user-select: none;
+    }
+    .order-items li:active { cursor: grabbing; }
+    .order-items li.dragging { opacity: .5; }
+    .order-items li.drag-over { border-color: var(--green-med); background: var(--green-bg); }
+    .drag-handle { color: #bbb; font-size: 1rem; flex-shrink: 0; }
+    .check-btn {
+      background: var(--green); color: white; border: none; border-radius: 6px;
+      padding: .55rem 1.2rem; font-family: 'Helvetica Neue', sans-serif;
+      font-size: .9rem; font-weight: 700; cursor: pointer; margin-top: .5rem;
+    }
+    .check-btn:hover { background: var(--green-med); }
+    .order-feedback { margin-top: .8rem; font-size: .92rem; display: none; }
+    .order-feedback.correct { color: #1b5e20; }
+    .order-feedback.wrong   { color: var(--red); }
+
+    /* ── Nav footer ── */
+    .nav-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 3rem; padding-top: 1.5rem; border-top: 2px solid var(--green-light);
+      font-family: 'Helvetica Neue', sans-serif; font-size: .9rem;
+    }
+    .nav-footer a { color: var(--green); text-decoration: none; font-weight: 700; }
+    .nav-footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<header>
+  <p class="meta">Lesson 2 of 3 &nbsp;·&nbsp; WECA Regional Indicators Workflow</p>
+  <h1>Your Workflow</h1>
+  <p class="subtitle">Branching, contributing, and the files you must never commit</p>
+  <p class="time">⏱ ~15 minutes</p>
+</header>
+
+<hr>
+
+<h2>Why branches?</h2>
+
+<p>Each analyst owns one or more chapters. Without branches, two analysts editing the book at the same time would constantly collide. Branches give each contributor an isolated workspace — changes stay separate until they're reviewed and merged.</p>
+
+<p>Think of it like working on your own copy of a shared document. You make your changes, then propose them for inclusion. The project lead reviews, approves, and merges.</p>
+
+<h2>Branch naming</h2>
+
+<p>Use the pattern <code>yourname/chapter-or-feature</code>:</p>
+
+<div class="example-grid">
+  <div class="eg-card good"><div class="eg-label">✓ Good</div>heather/transport</div>
+  <div class="eg-card good"><div class="eg-label">✓ Good</div>alex/environment</div>
+  <div class="eg-card good"><div class="eg-label">✓ Good</div>sarah/weca-theme-update</div>
+  <div class="eg-card good"><div class="eg-label">✓ Good</div>megan/04-skills</div>
+  <div class="eg-card bad"><div class="eg-label">✗ Wrong</div>Transport Chapter</div>
+  <div class="eg-card bad"><div class="eg-label">✗ Wrong</div>feature/new_stuff</div>
+</div>
+
+<p>Rules: lowercase, hyphens between words, include your name or initials. No spaces, no uppercase, no special characters.</p>
+
+<h2>The full workflow — step by step</h2>
+
+<div class="pipeline">
+  <div class="pipe-step">
+    <div class="pipe-connector"><div class="pipe-num">1</div><div class="pipe-line"></div></div>
+    <div class="pipe-body">
+      <h3>Start from a fresh main</h3>
+      <p>Always branch from an up-to-date main to avoid carrying stale history.</p>
+      <pre><code>git checkout main
+git pull
+git checkout -b yourname/chapter-name</code></pre>
+    </div>
+  </div>
+  <div class="pipe-step">
+    <div class="pipe-connector"><div class="pipe-num">2</div><div class="pipe-line"></div></div>
+    <div class="pipe-body">
+      <h3>Do your work, then render</h3>
+      <p>Edit your chapter and scripts. When ready, render to update the freeze cache.</p>
+      <pre><code>quarto render chapters/0X-topic/index.qmd</code></pre>
+    </div>
+  </div>
+  <div class="pipe-step">
+    <div class="pipe-connector"><div class="pipe-num">3</div><div class="pipe-line"></div></div>
+    <div class="pipe-body">
+      <h3>Check git status before staging anything</h3>
+      <p>Verify you can see the four expected files — and nothing unexpected.</p>
+      <pre><code>git status</code></pre>
+    </div>
+  </div>
+  <div class="pipe-step">
+    <div class="pipe-connector"><div class="pipe-num">4</div><div class="pipe-line"></div></div>
+    <div class="pipe-body">
+      <h3>Stage exactly the right files — by name</h3>
+      <p>Never use <code>git add .</code>. Name every file individually.</p>
+      <pre><code>git add chapters/0X-topic/index.qmd
+git add scripts/R/0X-topic/RI_XY_name.R
+git add data/fact/RI_XY_name.csv
+git add _freeze/chapters/0X-topic/index/execute-results/html.json
+# If you have new plots:
+git add _freeze/chapters/0X-topic/index/figure-html/</code></pre>
+    </div>
+  </div>
+  <div class="pipe-step">
+    <div class="pipe-connector"><div class="pipe-num">5</div><div class="pipe-line"></div></div>
+    <div class="pipe-body">
+      <h3>Commit with a conventional message</h3>
+      <p>Use <code>feat:</code> for new indicators, <code>fix:</code> for corrections, <code>docs:</code> for narrative changes. First line under 50 characters.</p>
+      <pre><code>git commit -m "feat: add apprenticeship starts indicator"</code></pre>
+    </div>
+  </div>
+  <div class="pipe-step">
+    <div class="pipe-connector"><div class="pipe-num">6</div><div class="pipe-line"></div></div>
+    <div class="pipe-body">
+      <h3>Push and open a pull request</h3>
+      <p>Push your branch and create a PR on GitHub. Assign a reviewer.</p>
+      <pre><code>git push -u origin yourname/chapter-name</code></pre>
+    </div>
+  </div>
+</div>
+
+<h2>Files you must never commit</h2>
+
+<p>If these appear in <code>git status</code>, do not <code>git add</code> them:</p>
+
+<table>
+  <thead>
+    <tr><th>File</th><th>Why it must stay local</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>renv.lock</code>, <code>renv/activate.R</code></td>
+      <td>The shared R environment — only the project lead changes these. Your version may differ.</td>
+    </tr>
+    <tr>
+      <td><code>weca_regional_indicators.Rproj</code></td>
+      <td>IDE configuration file. Differs per machine.</td>
+    </tr>
+    <tr>
+      <td><code>data/raw/*</code></td>
+      <td>Gitignored. Raw data is too large and often sensitive. Should never appear.</td>
+    </tr>
+    <tr>
+      <td>Personal files (<code>simon.R</code>, <code>scratch.qmd</code>)</td>
+      <td>Keep these local. They will confuse other analysts.</td>
+    </tr>
+    <tr>
+      <td><code>.env</code></td>
+      <td>Contains database credentials. Blocked by pre-commit hook.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout warn">
+  <p class="callout-label">Why not <code>git add .</code>?</p>
+  <p><code>git add .</code> stages everything it finds — including <code>renv.lock</code>, your <code>.Rproj</code>, and any personal scratch files. Stage by name so you know exactly what's going in.</p>
+</div>
+
+<h2>Commit message format</h2>
+
+<p>This project uses <strong>conventional commits</strong>. The format is:</p>
+
+<pre><code>type: short description (≤50 chars, imperative mood)
+
+Optional body explaining why — not what.</code></pre>
+
+<table>
+  <thead><tr><th>Type</th><th>Use for</th></tr></thead>
+  <tbody>
+    <tr><td><code>feat:</code></td><td>A new indicator or chart</td></tr>
+    <tr><td><code>fix:</code></td><td>Correcting a calculation, a broken render</td></tr>
+    <tr><td><code>docs:</code></td><td>Narrative text only, no code changes</td></tr>
+    <tr><td><code>chore:</code></td><td>Housekeeping — updating gitignore, CI config</td></tr>
+    <tr><td><code>refactor:</code></td><td>Code restructured, no behaviour change</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<!-- Order exercise -->
+<div class="order-exercise">
+  <h3>Exercise: put the steps in order</h3>
+  <p style="font-size:.9rem;color:var(--muted);margin-bottom:1rem;">Drag the steps into the correct order for a complete contribution. Then click <em>Check order</em>.</p>
+  <ul class="order-items" id="order-list">
+    <li draggable="true" data-idx="3"><span class="drag-handle">⠿</span>Stage exactly the four files by name</li>
+    <li draggable="true" data-idx="1"><span class="drag-handle">⠿</span>Checkout main, pull, create your branch</li>
+    <li draggable="true" data-idx="5"><span class="drag-handle">⠿</span>Push branch and open pull request on GitHub</li>
+    <li draggable="true" data-idx="2"><span class="drag-handle">⠿</span>Edit chapter, then render locally</li>
+    <li draggable="true" data-idx="0"><span class="drag-handle">⠿</span>Run git status to check what changed</li>
+    <li draggable="true" data-idx="4"><span class="drag-handle">⠿</span>Commit with a conventional message</li>
+  </ul>
+  <button class="check-btn" onclick="checkOrder()">Check order</button>
+  <p class="order-feedback" id="order-feedback"></p>
+</div>
+
+<!-- Quiz -->
+<div class="quiz-wrap" id="quiz">
+  <h2>Check your understanding</h2>
+  <p style="color:var(--muted);font-size:.9rem;margin-bottom:1.5rem;">Click an answer — explanations reveal after each selection.</p>
+
+  <div class="question" id="q1">
+    <p class="q-text">Heather is starting work on the transport chapter. Which branch name follows the project convention?</p>
+    <div class="options">
+      <button class="opt" data-correct="false" onclick="answer(this,1)">feature/transport-chapter-heather-2024</button>
+      <button class="opt" data-correct="true"  onclick="answer(this,1)">heather/transport</button>
+      <button class="opt" data-correct="false" onclick="answer(this,1)">Transport_Chapter</button>
+      <button class="opt" data-correct="false" onclick="answer(this,1)">heather_transport_update</button>
+    </div>
+    <div class="explanation" id="exp1">
+      The convention is <code>yourname/chapter-or-feature</code>: lowercase, hyphens, name first. <code>heather/transport</code> matches exactly. Underscores, capitals, and long prefixes like <code>feature/</code> are not used in this project.
+    </div>
+  </div>
+
+  <div class="question" id="q2">
+    <p class="q-text">You've staged your four files and are writing your commit message. You added a new GHG emissions indicator. Which message is correct?</p>
+    <div class="options">
+      <button class="opt" data-correct="false" onclick="answer(this,2)">added ghg emissions indicator to environment chapter</button>
+      <button class="opt" data-correct="false" onclick="answer(this,2)">Update environment chapter with new data</button>
+      <button class="opt" data-correct="true"  onclick="answer(this,2)">feat: add GHG emissions indicator</button>
+      <button class="opt" data-correct="false" onclick="answer(this,2)">WIP environment chapter - ghg indicator</button>
+    </div>
+    <div class="explanation" id="exp2">
+      Conventional commits require a type prefix (<code>feat:</code> for a new indicator), imperative mood ("add", not "added"), and ≤50 characters on the first line. The third option is correct. "Update" is too vague; "WIP" should never be committed; bare sentences without a type prefix don't follow the convention.
+    </div>
+  </div>
+
+  <div class="question" id="q3">
+    <p class="q-text">After rendering, <code>git status</code> shows <code>renv.lock</code> as modified. What should you do?</p>
+    <div class="options">
+      <button class="opt" data-correct="false" onclick="answer(this,3)">Add and commit it — lock file changes are important to track.</button>
+      <button class="opt" data-correct="true"  onclick="answer(this,3)">Do not stage it — only the project lead manages renv.lock.</button>
+      <button class="opt" data-correct="false" onclick="answer(this,3)">Delete the file — it shouldn't exist in the project root.</button>
+      <button class="opt" data-correct="false" onclick="answer(this,3)">Run renv::restore() first, then commit the result.</button>
+    </div>
+    <div class="explanation" id="exp3">
+      <code>renv.lock</code> defines the shared R package environment for the whole team. Only the project lead should update it. If it appears modified locally, it means your R session diverged from the project's pinned versions. Do not stage it. Stage only your four named files.
+    </div>
+  </div>
+
+  <div class="score-box" id="score-box"></div>
+</div>
+
+<p style="font-size:.9rem;color:var(--muted);margin-top:2rem;">
+  <strong>Primary source:</strong> <a href="https://github.com/westofengland-ca/weca_regional_indicators/blob/main/CONTRIBUTING.md" style="color:var(--green);">CONTRIBUTING.md</a> — git workflow, branch conventions, PR template, and the peer review checklist.
+</p>
+<p style="font-size:.9rem;color:var(--muted);">
+  Have a question? Ask your teacher in this conversation — just type it and continue the session.
+</p>
+
+<nav class="nav-footer">
+  <a href="0001-the-freeze-cache.html">← Lesson 1: The Freeze Cache</a>
+  <a href="0003-diagnosing-failures.html">Lesson 3: Diagnosing Failures →</a>
+</nav>
+
+<script>
+  /* ── Quiz logic ── */
+  let scores = { correct: 0, answered: 0, total: 3 };
+
+  function answer(btn, qNum) {
+    const container = document.getElementById('q' + qNum);
+    const exp = document.getElementById('exp' + qNum);
+    const isCorrect = btn.dataset.correct === 'true';
+    container.querySelectorAll('.opt').forEach(b => {
+      b.disabled = true;
+      if (b.dataset.correct === 'true') b.classList.add('correct');
+    });
+    if (!isCorrect) btn.classList.add('wrong');
+    exp.style.display = 'block';
+    scores.answered++;
+    if (isCorrect) scores.correct++;
+    if (scores.answered === scores.total) showScore();
+  }
+  function showScore() {
+    const box = document.getElementById('score-box');
+    const pct = Math.round(scores.correct / scores.total * 100);
+    const msg = pct === 100 ? '🎉 Perfect score!' : pct >= 67 ? '👍 Good — review any explanations you missed.' : '📖 Worth re-reading the lesson before moving on.';
+    box.textContent = scores.correct + ' / ' + scores.total + ' correct. ' + msg;
+    box.style.display = 'block';
+  }
+
+  /* ── Drag-to-order exercise ── */
+  // Correct order: checkout/pull/branch → edit/render → git status → stage → commit → push/PR
+  // data-idx values: 0=status,1=checkout,2=edit,3=stage,4=commit,5=push
+  // Correct sequence of data-idx: 1,2,0,3,4,5
+  const CORRECT_ORDER = [1, 2, 0, 3, 4, 5];
+  const list = document.getElementById('order-list');
+  let dragged = null;
+
+  list.querySelectorAll('li').forEach(item => {
+    item.addEventListener('dragstart', e => {
+      dragged = item;
+      setTimeout(() => item.classList.add('dragging'), 0);
+    });
+    item.addEventListener('dragend', () => { item.classList.remove('dragging'); dragged = null; });
+    item.addEventListener('dragover', e => { e.preventDefault(); item.classList.add('drag-over'); });
+    item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+    item.addEventListener('drop', e => {
+      e.preventDefault();
+      item.classList.remove('drag-over');
+      if (dragged && dragged !== item) {
+        const items = [...list.querySelectorAll('li')];
+        const from = items.indexOf(dragged);
+        const to   = items.indexOf(item);
+        if (from < to) item.after(dragged); else item.before(dragged);
+      }
+    });
+  });
+
+  function checkOrder() {
+    const items  = [...list.querySelectorAll('li')];
+    const actual = items.map(li => parseInt(li.dataset.idx));
+    const fb     = document.getElementById('order-feedback');
+    const correct = actual.every((v, i) => v === CORRECT_ORDER[i]);
+    fb.style.display = 'block';
+    if (correct) {
+      fb.className = 'order-feedback correct';
+      fb.textContent = '✓ Correct order! checkout/pull → edit/render → git status → stage → commit → push & PR.';
+    } else {
+      fb.className = 'order-feedback wrong';
+      fb.textContent = '✗ Not quite. Hint: check the status before staging, and always start from an up-to-date main.';
+    }
+  }
+</script>
+</body>
+</html>

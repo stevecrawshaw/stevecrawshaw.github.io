@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 1 · The Freeze Cache</title>
+  <style>
+    :root {
+      --green:       #2e7d32;
+      --green-med:   #388e3c;
+      --green-light: #c8e6c9;
+      --green-bg:    #f1f8e9;
+      --amber:       #e65100;
+      --amber-light: #fff3e0;
+      --red:         #b71c1c;
+      --red-light:   #ffebee;
+      --bg:          #fafaf8;
+      --card:        #ffffff;
+      --text:        #1a1a1a;
+      --muted:       #666;
+      --border:      #e0e0e0;
+      --shadow:      0 2px 10px rgba(0,0,0,0.07);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 18px;
+      line-height: 1.8;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 5rem;
+      background: var(--bg);
+      color: var(--text);
+    }
+    /* ── Typography ── */
+    h1  { font-size: 2rem; line-height: 1.2; color: var(--green); margin-bottom: .3rem; }
+    h2  { font-size: 1.3rem; color: var(--green-med); border-bottom: 2px solid var(--green-light);
+          padding-bottom: .3rem; margin: 2.5rem 0 .8rem; }
+    h3  { font-size: 1.05rem; margin: 1.5rem 0 .5rem; }
+    p   { margin-bottom: 1rem; }
+    ul, ol { padding-left: 1.6rem; margin-bottom: 1rem; }
+    li  { margin-bottom: .35rem; }
+    strong { color: var(--green); }
+    .subtitle  { font-size: 1rem; color: var(--muted); font-style: italic; margin-bottom: .4rem; }
+    .meta      { font-family: 'Helvetica Neue', Helvetica, sans-serif; font-size: .8rem;
+                 text-transform: uppercase; letter-spacing: .08em; color: var(--green); font-weight: 700; }
+    .time      { font-family: 'Helvetica Neue', Helvetica, sans-serif; font-size: .85rem;
+                 color: var(--muted); margin-top: .3rem; }
+
+    /* ── Code ── */
+    code { font-family: 'SF Mono','Fira Code','Consolas',monospace; font-size: .83em;
+           background: #f0f0f0; border-radius: 3px; padding: .1em .4em; }
+    pre  { font-family: 'SF Mono','Fira Code','Consolas',monospace; font-size: .82em;
+           background: #f5f5f5; border-left: 3px solid var(--green); border-radius: 0 5px 5px 0;
+           padding: 1rem 1.2rem; overflow-x: auto; margin: 1rem 0; line-height: 1.6; }
+    pre code { background: none; padding: 0; font-size: inherit; }
+
+    /* ── Callout boxes ── */
+    .callout {
+      border-left: 4px solid var(--green);
+      background: var(--green-bg);
+      border-radius: 0 6px 6px 0;
+      padding: .9rem 1.2rem;
+      margin: 1.5rem 0;
+    }
+    .callout.warn {
+      border-color: var(--amber);
+      background: var(--amber-light);
+    }
+    .callout p:last-child { margin-bottom: 0; }
+    .callout-label {
+      font-family: 'Helvetica Neue', sans-serif;
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--green);
+      margin-bottom: .3rem;
+    }
+    .callout.warn .callout-label { color: var(--amber); }
+
+    /* ── Diagram ── */
+    .diagram {
+      font-family: 'SF Mono','Fira Code','Consolas',monospace;
+      font-size: .8rem;
+      line-height: 1.65;
+      background: #f5f5f5;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.2rem 1.5rem;
+      margin: 1.5rem 0;
+      overflow-x: auto;
+    }
+
+    /* ── Four-file grid ── */
+    .file-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem;
+      margin: 1.5rem 0;
+    }
+    @media (max-width: 520px) { .file-grid { grid-template-columns: 1fr; } }
+    .file-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: var(--shadow);
+    }
+    .file-card .fname {
+      font-family: monospace;
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: .35rem;
+    }
+    .file-card p { font-size: .9rem; color: var(--muted); margin: 0; line-height: 1.5; }
+
+    /* ── Quiz ── */
+    .quiz-wrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      box-shadow: var(--shadow);
+    }
+    .quiz-wrap > h2 { margin-top: 0; }
+    .question { margin-bottom: 2rem; }
+    .question:last-of-type { margin-bottom: .5rem; }
+    .q-text { font-weight: 700; margin-bottom: .8rem; font-size: 1rem; }
+    .options { display: flex; flex-direction: column; gap: .45rem; }
+    .opt {
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      padding: .65rem 1rem;
+      text-align: left;
+      cursor: pointer;
+      font-family: Georgia, serif;
+      font-size: .92rem;
+      line-height: 1.5;
+      transition: border-color .15s, background .15s;
+    }
+    .opt:hover:not([disabled]) { border-color: var(--green-med); background: var(--green-bg); }
+    .opt.correct  { border-color: var(--green); background: #e8f5e9; color: #1b5e20; }
+    .opt.wrong    { border-color: #c62828; background: var(--red-light); color: var(--red); }
+    .opt[disabled] { cursor: default; }
+    .explanation {
+      display: none;
+      margin-top: .7rem;
+      padding: .7rem 1rem;
+      background: #f9f9f9;
+      border-radius: 6px;
+      border-left: 3px solid var(--green);
+      font-size: .92rem;
+      line-height: 1.55;
+    }
+    .score-box {
+      display: none;
+      text-align: center;
+      padding: 1rem;
+      margin-top: 1.5rem;
+      background: var(--green-bg);
+      border-radius: 8px;
+      font-family: 'Helvetica Neue', sans-serif;
+      font-size: 1.05rem;
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    /* ── Nav footer ── */
+    .nav-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 2px solid var(--green-light);
+      font-family: 'Helvetica Neue', sans-serif;
+      font-size: .9rem;
+    }
+    .nav-footer a {
+      color: var(--green);
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .nav-footer a:hover { text-decoration: underline; }
+    .nav-footer .nav-home { color: var(--muted); font-weight: 400; }
+
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+    .step-list { counter-reset: steps; list-style: none; padding: 0; }
+    .step-list li {
+      counter-increment: steps;
+      display: flex;
+      gap: .9rem;
+      margin-bottom: .9rem;
+      align-items: flex-start;
+    }
+    .step-list li::before {
+      content: counter(steps);
+      flex-shrink: 0;
+      width: 1.8rem; height: 1.8rem;
+      background: var(--green);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Helvetica Neue', sans-serif;
+      font-size: .8rem;
+      font-weight: 700;
+      margin-top: .15rem;
+    }
+    .step-list li p { margin: 0; }
+  </style>
+</head>
+<body>
+
+<header>
+  <p class="meta">Lesson 1 of 3 &nbsp;·&nbsp; WECA Regional Indicators Workflow</p>
+  <h1>The Freeze Cache</h1>
+  <p class="subtitle">Why it exists, how it works, and the four files you always commit</p>
+  <p class="time">⏱ ~10 minutes</p>
+</header>
+
+<hr>
+
+<h2>The problem this solves</h2>
+
+<p>Five analysts. Five laptops. Five sets of raw data — none of which can go into git (too large, potentially sensitive). One published book on GitHub Pages.</p>
+
+<p>How does GitHub build the full report when it has none of the raw data?</p>
+
+<p>The answer is the <strong>freeze cache</strong>.</p>
+
+<h2>How the freeze cache works</h2>
+
+<p>When you render your chapter locally:</p>
+
+<pre><code>quarto render chapters/05-environment/index.qmd</code></pre>
+
+<p>Quarto runs your R code, produces your charts and tables, then <strong>saves a photograph of all the outputs</strong> to the <code>_freeze/</code> directory:</p>
+
+<div class="diagram">_freeze/
+  chapters/
+    05-environment/
+      index/
+        execute-results/
+          html.json        ← the "photograph" of your outputs
+        figure-html/
+          my-plot-1.png    ← any generated figures</div>
+
+<p>The <code>html.json</code> file contains everything needed to rebuild your chapter page: every table, every number, every chart reference.</p>
+
+<h3>The fingerprint check</h3>
+
+<p>Each time GitHub builds the book, Quarto checks whether your source file has changed by comparing <strong>fingerprints</strong> (hashes):</p>
+
+<div class="diagram">Source file fingerprint  ==  Stored fingerprint in html.json?
+
+  ✅  MATCH   → Use the photograph. Raw data never needed.
+  ❌  MISMATCH → Try to re-run your R code → FAIL (no raw data on GitHub)</div>
+
+<div class="callout warn">
+  <p class="callout-label">Critical rule</p>
+  <p>Every time you change your chapter source, you <em>must</em> re-render locally and commit the updated <code>html.json</code>. Even a one-word edit to a heading will break the fingerprint match.</p>
+</div>
+
+<h2>The four files you always commit together</h2>
+
+<p>A contribution to this book is never a single file. It is always <strong>exactly these four things</strong>:</p>
+
+<div class="file-grid">
+  <div class="file-card">
+    <div class="fname">chapters/0X-topic/index.qmd</div>
+    <p>The narrative and code for your chapter.</p>
+  </div>
+  <div class="file-card">
+    <div class="fname">scripts/R/0X-topic/RI_XY_name.R</div>
+    <p>The indicator script that processes raw data into a fact CSV.</p>
+  </div>
+  <div class="file-card">
+    <div class="fname">data/fact/RI_XY_name.csv</div>
+    <p>The processed indicator data. Small enough to commit; no sensitive raw data.</p>
+  </div>
+  <div class="file-card">
+    <div class="fname">_freeze/…/html.json</div>
+    <p>The freeze snapshot. Without this, GitHub can't render your chapter.</p>
+  </div>
+</div>
+
+<div class="callout">
+  <p class="callout-label">The freeze path — get it right</p>
+  <p>There is <em>no</em> <code>html/</code> folder between <code>_freeze/</code> and <code>chapters/</code>. The correct path is:</p>
+  <pre style="margin:.5rem 0 0"><code>_freeze/chapters/0X-topic/index/execute-results/html.json</code></pre>
+</div>
+
+<h2>The workflow in sequence</h2>
+
+<ol class="step-list">
+  <li><p><strong>Render your chapter</strong> locally — your raw data must be in <code>data/raw/</code>. <br><code>quarto render chapters/0X-topic/index.qmd</code></p></li>
+  <li><p><strong>Check what git sees</strong> — verify all four files appear as modified or untracked. <br><code>git status</code></p></li>
+  <li><p><strong>Stage exactly the right files</strong> — name them individually, never <code>git add .</code></p></li>
+  <li><p><strong>Commit and push</strong> to your branch.</p></li>
+</ol>
+
+<p>Missing any of the four files means a publishing failure. The freeze snapshot is the most commonly forgotten.</p>
+
+<hr>
+
+<div class="quiz-wrap" id="quiz">
+  <h2>Check your understanding</h2>
+  <p style="color:var(--muted);font-size:.9rem;margin-bottom:1.5rem;">Click an answer. Explanations reveal after each selection.</p>
+
+  <!-- Q1 -->
+  <div class="question" id="q1">
+    <p class="q-text">You make a small edit to your chapter — fixing a typo in a heading. What happens when GitHub Actions tries to build the book?</p>
+    <div class="options">
+      <button class="opt" data-correct="false" onclick="answer(this,1)">Nothing changes — Quarto ignores whitespace and text edits.</button>
+      <button class="opt" data-correct="true"  onclick="answer(this,1)">The fingerprint mismatches — GitHub tries to re-run your R code and fails without your raw data.</button>
+      <button class="opt" data-correct="false" onclick="answer(this,1)">The chapter is skipped — Quarto marks it as unchanged and renders without it.</button>
+      <button class="opt" data-correct="false" onclick="answer(this,1)">GitHub raises a merge conflict — two people edited the same file.</button>
+    </div>
+    <div class="explanation" id="exp1">
+      Any edit — even a single character — changes the source file's hash. Quarto detects a fingerprint mismatch and tries to re-execute your code. Since GitHub has no raw data, it fails with a "path does not exist" error. The fix: re-render locally, commit the updated <code>html.json</code>.
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="question" id="q2">
+    <p class="q-text">Which four files must always be committed together for a successful contribution?</p>
+    <div class="options">
+      <button class="opt" data-correct="false" onclick="answer(this,2)">Chapter .qmd, renv.lock, raw data CSV, freeze html.json</button>
+      <button class="opt" data-correct="true"  onclick="answer(this,2)">Chapter .qmd, indicator R script, fact CSV, freeze html.json</button>
+      <button class="opt" data-correct="false" onclick="answer(this,2)">Chapter .qmd, indicator R script, raw data CSV, .Rproj file</button>
+      <button class="opt" data-correct="false" onclick="answer(this,2)">Indicator R script, fact CSV, freeze html.json, .Renviron file</button>
+    </div>
+    <div class="explanation" id="exp2">
+      The four are: (1) chapter source <code>.qmd</code>, (2) indicator R script in <code>scripts/R/</code>, (3) fact CSV in <code>data/fact/</code>, and (4) the freeze snapshot <code>html.json</code>. Never commit <code>renv.lock</code>, <code>.Rproj</code>, raw data, or <code>.Renviron</code> — these belong to the project lead or stay local.
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="question" id="q3">
+    <p class="q-text">What does the <code>html.json</code> file inside <code>_freeze/</code> actually contain?</p>
+    <div class="options">
+      <button class="opt" data-correct="false" onclick="answer(this,3)">The raw R code from your chapter, saved for re-use on GitHub.</button>
+      <button class="opt" data-correct="false" onclick="answer(this,3)">A log of errors from your last render, used to debug the build.</button>
+      <button class="opt" data-correct="true"  onclick="answer(this,3)">A snapshot of all rendered outputs — tables, figures, computed values — plus the source fingerprint.</button>
+      <button class="opt" data-correct="false" onclick="answer(this,3)">The configuration for your chapter's Quarto YAML front-matter options.</button>
+    </div>
+    <div class="explanation" id="exp3">
+      Think of <code>html.json</code> as a <em>photograph</em> of everything your code produced: every table cell, every chart reference, every computed number. It also stores the source file's fingerprint so Quarto knows whether the source has changed since the snapshot was taken. This is the entire mechanism that lets GitHub build the book without your raw data.
+    </div>
+  </div>
+
+  <div class="score-box" id="score-box"></div>
+</div>
+
+<div class="callout">
+  <p class="callout-label">The one thing to remember</p>
+  <p>Change your chapter → re-render → commit the updated <code>html.json</code>. Every time, without exception.</p>
+</div>
+
+<p style="font-size:.9rem;color:var(--muted);margin-top:2rem;">
+  <strong>Primary source:</strong> <a href="https://github.com/westofengland-ca/weca_regional_indicators/blob/main/docs/WORKFLOW_LEARNING_GUIDE.md" style="color:var(--green);">WORKFLOW_LEARNING_GUIDE.md</a> — the authoritative guide for this project's publish workflow.
+</p>
+<p style="font-size:.9rem;color:var(--muted);">
+  Have a question? Ask your teacher in this conversation — just type it and continue the session.
+</p>
+
+<nav class="nav-footer">
+  <span class="nav-home">Lesson 1 of 3</span>
+  <a href="0002-branching-workflow.html">Lesson 2: Your Workflow →</a>
+</nav>
+
+<script>
+  let scores = { correct: 0, answered: 0, total: 3 };
+
+  function answer(btn, qNum) {
+    const container = document.getElementById('q' + qNum);
+    const exp = document.getElementById('exp' + qNum);
+    const isCorrect = btn.dataset.correct === 'true';
+
+    container.querySelectorAll('.opt').forEach(b => {
+      b.disabled = true;
+      if (b.dataset.correct === 'true') b.classList.add('correct');
+    });
+    if (!isCorrect) btn.classList.add('wrong');
+
+    exp.style.display = 'block';
+
+    scores.answered++;
+    if (isCorrect) scores.correct++;
+
+    if (scores.answered === scores.total) showScore();
+  }
+
+  function showScore() {
+    const box = document.getElementById('score-box');
+    const pct = Math.round(scores.correct / scores.total * 100);
+    const msg = pct === 100 ? '🎉 Perfect score!' : pct >= 67 ? '👍 Good — review the explanations for any you missed.' : '📖 Worth re-reading the lesson before moving on.';
+    box.textContent = scores.correct + ' / ' + scores.total + ' correct. ' + msg;
+    box.style.display = 'block';
+  }
+</script>
+</body>
+</html>

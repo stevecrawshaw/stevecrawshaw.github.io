@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WECA Workflow — Quick Reference</title>
+  <style>
+    :root {
+      --green:       #2e7d32;
+      --green-med:   #388e3c;
+      --green-light: #c8e6c9;
+      --green-bg:    #f1f8e9;
+      --amber:       #e65100;
+      --amber-light: #fff3e0;
+      --red:         #b71c1c;
+      --red-light:   #ffebee;
+      --bg:          #fafaf8;
+      --card:        #ffffff;
+      --text:        #1a1a1a;
+      --muted:       #555;
+      --border:      #ddd;
+      --shadow:      0 2px 8px rgba(0,0,0,0.06);
+    }
+    @media print {
+      body { font-size: 11pt; padding: 1.5cm; }
+      .no-print { display: none; }
+      .section { break-inside: avoid; }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      line-height: 1.6;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 3rem;
+      background: var(--bg);
+      color: var(--text);
+    }
+    /* ── Header ── */
+    .page-header {
+      border-bottom: 3px solid var(--green);
+      padding-bottom: .75rem;
+      margin-bottom: 1.5rem;
+    }
+    .page-header h1 {
+      font-size: 1.5rem;
+      color: var(--green);
+      font-weight: 700;
+      margin-bottom: .2rem;
+    }
+    .page-header p { color: var(--muted); font-size: .85rem; }
+
+    /* ── Two-column layout ── */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-bottom: 1.2rem; }
+    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+    .full { grid-column: 1 / -1; }
+
+    /* ── Section cards ── */
+    .section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.1rem;
+      box-shadow: var(--shadow);
+    }
+    .section h2 {
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      font-weight: 700;
+      color: var(--green);
+      border-bottom: 1px solid var(--green-light);
+      padding-bottom: .3rem;
+      margin-bottom: .7rem;
+    }
+
+    /* ── Code & pre ── */
+    code { font-family: 'SF Mono','Fira Code','Consolas',monospace; font-size: .85em;
+           background: #f0f0f0; border-radius: 3px; padding: .1em .3em; }
+    pre  { font-family: 'SF Mono','Fira Code','Consolas',monospace; font-size: .78em;
+           background: #1e1e1e; color: #d4d4d4;
+           border-radius: 5px; padding: .75rem .9rem; overflow-x: auto;
+           margin: .5rem 0; line-height: 1.55; }
+    pre code { background: none; padding: 0; font-size: inherit; color: inherit; }
+    pre .cmt  { color: #6a9955; }
+    pre .err  { color: #f48771; }
+
+    /* ── Tables ── */
+    table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    th { background: var(--green); color: white; padding: .4rem .6rem; text-align: left; font-size: .75rem; }
+    td { padding: .4rem .6rem; border-bottom: 1px solid #eee; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:nth-child(even) td { background: #f9f9f9; }
+    td code { font-size: .78em; }
+
+    /* ── Step list ── */
+    .steps { list-style: none; padding: 0; }
+    .steps li {
+      display: flex; gap: .6rem; align-items: flex-start; margin-bottom: .55rem;
+      font-size: .84rem;
+    }
+    .steps li::before {
+      content: attr(data-n);
+      flex-shrink: 0;
+      width: 1.4rem; height: 1.4rem;
+      background: var(--green); color: white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .68rem; font-weight: 700;
+    }
+    .steps li > div { line-height: 1.4; }
+
+    /* ── Badge groups ── */
+    .badge-grid { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .badge {
+      font-family: monospace; font-size: .78rem;
+      padding: .2rem .5rem; border-radius: 4px;
+    }
+    .badge.good { background: #e8f5e9; color: #1b5e20; border: 1px solid #a5d6a7; }
+    .badge.bad  { background: var(--red-light); color: var(--red); border: 1px solid #ef9a9a; text-decoration: line-through; }
+
+    /* ── Error index ── */
+    .error-row { margin-bottom: .6rem; font-size: .82rem; }
+    .error-msg {
+      font-family: monospace; font-size: .75em; color: #c0392b;
+      background: #fff5f5; padding: .2rem .45rem; border-radius: 3px; display: block;
+      margin-bottom: .2rem; word-break: break-all;
+    }
+    .error-fix { color: var(--muted); }
+    .error-fix strong { color: var(--text); }
+
+    /* ── Fingerprint diagram ── */
+    .fp-diagram {
+      font-family: monospace; font-size: .75rem;
+      background: #1e1e1e; color: #d4d4d4;
+      border-radius: 6px; padding: .85rem 1rem;
+      line-height: 1.7;
+    }
+    .fp-ok  { color: #b5cea8; }
+    .fp-bad { color: #f48771; }
+    .fp-key { color: #9cdcfe; }
+
+    /* ── Nav ── */
+    .nav-footer {
+      display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;
+      margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);
+      font-size: .82rem; color: var(--muted);
+    }
+    .nav-footer a { color: var(--green); text-decoration: none; font-weight: 600; }
+    .nav-footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>WECA Regional Indicators — Workflow Quick Reference</h1>
+  <p>Distilled from <code>CONTRIBUTING.md</code> and <code>docs/WORKFLOW_LEARNING_GUIDE.md</code> &nbsp;·&nbsp; Print-friendly</p>
+</div>
+
+<div class="grid">
+
+  <!-- Freeze cache -->
+  <div class="section">
+    <h2>How the freeze cache works</h2>
+    <div class="fp-diagram">
+<span class="fp-key">Source fingerprint</span> == <span class="fp-key">html.json fingerprint?</span>
+
+  <span class="fp-ok">✅ MATCH</span>   → use cached outputs. Done.
+  <span class="fp-bad">❌ MISMATCH</span> → try to re-run code → FAIL
+             (no raw data on GitHub)</div>
+    <p style="margin-top:.6rem;font-size:.82rem;color:var(--muted);">Any edit to your chapter shifts its hash. Always re-render and commit the updated <code>html.json</code> after editing.</p>
+  </div>
+
+  <!-- The 4 files -->
+  <div class="section">
+    <h2>The four files — always together</h2>
+    <table>
+      <thead><tr><th>File</th><th>Location</th></tr></thead>
+      <tbody>
+        <tr><td>Chapter source</td><td><code>chapters/0X-topic/index.qmd</code></td></tr>
+        <tr><td>Indicator script</td><td><code>scripts/R/0X-topic/RI_XY_name.R</code></td></tr>
+        <tr><td>Fact CSV</td><td><code>data/fact/RI_XY_name.csv</code></td></tr>
+        <tr><td><strong>Freeze snapshot</strong></td><td><code>_freeze/chapters/0X-topic/index/execute-results/html.json</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Workflow steps -->
+  <div class="section">
+    <h2>Contribution workflow</h2>
+    <ul class="steps">
+      <li data-n="1"><div>Checkout main, pull, create branch<br><code>git checkout -b yourname/chapter-name</code></div></li>
+      <li data-n="2"><div>Edit chapter, render locally<br><code>quarto render chapters/0X-topic/index.qmd</code></div></li>
+      <li data-n="3"><div>Check git status before staging anything<br><code>git status</code></div></li>
+      <li data-n="4"><div>Stage the four files by name — never <code>git add .</code></div></li>
+      <li data-n="5"><div>Commit with conventional message<br><code>git commit -m "feat: description"</code></div></li>
+      <li data-n="6"><div>Push &amp; open PR on GitHub</div></li>
+    </ul>
+  </div>
+
+  <!-- Branch naming -->
+  <div class="section">
+    <h2>Branch naming</h2>
+    <p style="font-size:.82rem;margin-bottom:.5rem;">Pattern: <code>yourname/chapter-or-feature</code></p>
+    <div class="badge-grid">
+      <span class="badge good">heather/transport</span>
+      <span class="badge good">alex/environment</span>
+      <span class="badge good">megan/04-skills</span>
+      <span class="badge bad">Transport Chapter</span>
+      <span class="badge bad">feature/new_stuff</span>
+      <span class="badge bad">MyBranch</span>
+    </div>
+    <p style="margin-top:.6rem;font-size:.82rem;color:var(--muted);">Lowercase, hyphens, include your name. No spaces, no capitals, no underscores.</p>
+  </div>
+
+  <!-- Commit types -->
+  <div class="section">
+    <h2>Commit message types</h2>
+    <table>
+      <thead><tr><th>Prefix</th><th>Use when</th></tr></thead>
+      <tbody>
+        <tr><td><code>feat:</code></td><td>New indicator or chart</td></tr>
+        <tr><td><code>fix:</code></td><td>Correcting a calculation or broken render</td></tr>
+        <tr><td><code>docs:</code></td><td>Narrative text only, no code changes</td></tr>
+        <tr><td><code>chore:</code></td><td>Housekeeping (gitignore, CI config)</td></tr>
+        <tr><td><code>refactor:</code></td><td>Code restructured, no behaviour change</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:.5rem;font-size:.82rem;color:var(--muted);">First line ≤ 50 chars, imperative mood: "add", not "added".</p>
+  </div>
+
+  <!-- Never commit -->
+  <div class="section">
+    <h2>Never commit these</h2>
+    <table>
+      <thead><tr><th>File</th><th>Reason</th></tr></thead>
+      <tbody>
+        <tr><td><code>renv.lock</code></td><td>Project lead only</td></tr>
+        <tr><td><code>*.Rproj</code></td><td>IDE config, per-machine</td></tr>
+        <tr><td><code>data/raw/*</code></td><td>Gitignored, too large</td></tr>
+        <tr><td><code>.env</code></td><td>DB credentials — blocked by hook</td></tr>
+        <tr><td>Personal scratch files</td><td>Keep local</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Error index -->
+  <div class="section full">
+    <h2>Error index — cause &amp; fix</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div>
+        <div class="error-row">
+          <span class="error-msg">Error: `path` does not exist: '.../data/raw/...'</span>
+          <span class="error-fix"><strong>Cause:</strong> source edited, freeze cache not re-committed.<br><strong>Fix:</strong> re-render, <code>git add</code> updated <code>html.json</code>, commit &amp; push.</span>
+        </div>
+        <div class="error-row">
+          <span class="error-msg">error: failed to push some refs … Updates were rejected</span>
+          <span class="error-fix"><strong>Cause:</strong> remote has commits you don't have locally.<br><strong>Fix:</strong> <code>git pull origin branch-name</code> then push again.</span>
+        </div>
+        <div class="error-row">
+          <span class="error-msg">no changes added to commit</span>
+          <span class="error-fix"><strong>Cause:</strong> forgot <code>git add</code> before <code>git commit</code>.<br><strong>Fix:</strong> <code>git status</code>, then <code>git add</code> the right files.</span>
+        </div>
+      </div>
+      <div>
+        <div class="error-row">
+          <span class="error-msg">Error in source(...): cannot open file 'scripts/R/...'</span>
+          <span class="error-fix"><strong>Cause:</strong> R script exists locally but was never committed.<br><strong>Fix:</strong> <code>git add scripts/R/…</code> + <code>data/fact/…</code>, commit &amp; push.</span>
+        </div>
+        <div class="error-row">
+          <span class="error-msg">Committed/pushed to wrong branch</span>
+          <span class="error-fix"><strong>Cause:</strong> forgot to create or switch to feature branch.<br><strong>Fix:</strong> <code>git branch yourname/chapter</code> from current HEAD, <code>git reset --soft HEAD~1</code> on wrong branch, re-commit on correct branch.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick commands -->
+  <div class="section full">
+    <h2>Quick command reference</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <pre><code><span class="cmt"># Start a contribution</span>
+git checkout main
+git pull
+git checkout -b yourname/chapter-name
+
+<span class="cmt"># Render</span>
+quarto render chapters/0X-topic/index.qmd
+
+<span class="cmt"># Stage (name every file)</span>
+git add chapters/0X-topic/index.qmd
+git add scripts/R/0X-topic/RI_XY_name.R
+git add data/fact/RI_XY_name.csv
+git add _freeze/chapters/0X-topic/index/execute-results/html.json</code></pre>
+      <pre><code><span class="cmt"># Commit</span>
+git commit -m "feat: add X indicator"
+
+<span class="cmt"># Push and open PR</span>
+git push -u origin yourname/chapter-name
+
+<span class="cmt"># Force re-render (data updated, source unchanged)</span>
+quarto render chapters/0X-topic/index.qmd --execute-freeze refresh
+
+<span class="cmt"># Check what will re-execute</span>
+quarto render --dry-run</code></pre>
+    </div>
+  </div>
+
+</div>
+
+<nav class="nav-footer no-print">
+  <span>Lessons:</span>
+  <a href="0001-the-freeze-cache.html">1 · The Freeze Cache</a>
+  <a href="0002-branching-workflow.html">2 · Your Workflow</a>
+  <a href="0003-diagnosing-failures.html">3 · Diagnosing Failures</a>
+</nav>
+
+</body>
+</html>

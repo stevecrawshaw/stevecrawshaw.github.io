@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 3 · Diagnosing Failures</title>
+  <style>
+    :root {
+      --green:       #2e7d32;
+      --green-med:   #388e3c;
+      --green-light: #c8e6c9;
+      --green-bg:    #f1f8e9;
+      --amber:       #e65100;
+      --amber-light: #fff3e0;
+      --red:         #b71c1c;
+      --red-light:   #ffebee;
+      --bg:          #fafaf8;
+      --card:        #ffffff;
+      --text:        #1a1a1a;
+      --muted:       #666;
+      --border:      #e0e0e0;
+      --shadow:      0 2px 10px rgba(0,0,0,0.07);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 18px;
+      line-height: 1.8;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 5rem;
+      background: var(--bg);
+      color: var(--text);
+    }
+    h1  { font-size: 2rem; line-height: 1.2; color: var(--green); margin-bottom: .3rem; }
+    h2  { font-size: 1.3rem; color: var(--green-med); border-bottom: 2px solid var(--green-light);
+          padding-bottom: .3rem; margin: 2.5rem 0 .8rem; }
+    h3  { font-size: 1.05rem; margin: 1.2rem 0 .4rem; }
+    p   { margin-bottom: 1rem; }
+    ul, ol { padding-left: 1.6rem; margin-bottom: 1rem; }
+    li  { margin-bottom: .35rem; }
+    strong { color: var(--green); }
+    .subtitle  { font-size: 1rem; color: var(--muted); font-style: italic; margin-bottom: .4rem; }
+    .meta      { font-family: 'Helvetica Neue', Helvetica, sans-serif; font-size: .8rem;
+                 text-transform: uppercase; letter-spacing: .08em; color: var(--green); font-weight: 700; }
+    .time      { font-family: 'Helvetica Neue', Helvetica, sans-serif; font-size: .85rem;
+                 color: var(--muted); margin-top: .3rem; }
+    code { font-family: 'SF Mono','Fira Code','Consolas',monospace; font-size: .83em;
+           background: #f0f0f0; border-radius: 3px; padding: .1em .4em; }
+    pre  { font-family: 'SF Mono','Fira Code','Consolas',monospace; font-size: .8em;
+           background: #1e1e1e; color: #d4d4d4; border-radius: 6px;
+           padding: 1rem 1.2rem; overflow-x: auto; margin: .75rem 0; line-height: 1.6; }
+    pre code { background: none; padding: 0; font-size: inherit; color: inherit; }
+    pre .err  { color: #f48771; }
+    pre .hint { color: #9cdcfe; }
+    pre .ok   { color: #b5cea8; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+    .callout {
+      border-left: 4px solid var(--green); background: var(--green-bg);
+      border-radius: 0 6px 6px 0; padding: .9rem 1.2rem; margin: 1.5rem 0;
+    }
+    .callout p:last-child { margin-bottom: 0; }
+    .callout-label {
+      font-family: 'Helvetica Neue', sans-serif; font-size: .75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .07em; color: var(--green); margin-bottom: .3rem;
+    }
+
+    /* ── Case cards ── */
+    .case-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.4rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow);
+    }
+    .case-header {
+      display: flex; align-items: center; gap: .75rem; margin-bottom: .8rem;
+    }
+    .case-num {
+      width: 2rem; height: 2rem; background: var(--red); color: white;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-family: 'Helvetica Neue', sans-serif; font-size: .85rem; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .case-title { font-weight: 700; font-size: 1rem; }
+    .reveal-row { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: 1rem; }
+    .reveal-btn {
+      background: white; border: 2px solid var(--border); border-radius: 6px;
+      padding: .45rem .9rem; cursor: pointer; font-family: 'Helvetica Neue', sans-serif;
+      font-size: .82rem; font-weight: 600; transition: border-color .15s, background .15s;
+    }
+    .reveal-btn:hover { border-color: var(--green-med); background: var(--green-bg); }
+    .reveal-btn.active { border-color: var(--green); background: var(--green-bg); color: var(--green); }
+    .reveal-content {
+      display: none; margin-top: .8rem; padding: .85rem 1rem;
+      background: #f9f9f9; border-radius: 6px; border-left: 3px solid var(--green);
+      font-size: .92rem; line-height: 1.55;
+    }
+    .reveal-content.fix { border-color: var(--amber); }
+    .reveal-content pre { margin: .5rem 0 0; }
+
+    /* ── Diagnosis challenge (quiz) ── */
+    .quiz-wrap {
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 1.5rem; margin: 2rem 0; box-shadow: var(--shadow);
+    }
+    .quiz-wrap > h2 { margin-top: 0; }
+    .question { margin-bottom: 2rem; }
+    .question:last-of-type { margin-bottom: .5rem; }
+    .q-text { font-weight: 700; margin-bottom: .8rem; font-size: 1rem; }
+    .q-pre  { font-family: 'SF Mono','Fira Code',monospace; font-size: .78em;
+              background: #1e1e1e; color: #d4d4d4; border-radius: 6px;
+              padding: .8rem 1rem; overflow-x: auto; margin: .5rem 0 .8rem; line-height: 1.55; }
+    .q-pre .err { color: #f48771; }
+    .options { display: flex; flex-direction: column; gap: .45rem; }
+    .opt {
+      background: white; border: 2px solid var(--border); border-radius: 6px;
+      padding: .65rem 1rem; text-align: left; cursor: pointer;
+      font-family: Georgia, serif; font-size: .92rem; line-height: 1.5;
+      transition: border-color .15s, background .15s;
+    }
+    .opt:hover:not([disabled]) { border-color: var(--green-med); background: var(--green-bg); }
+    .opt.correct  { border-color: var(--green); background: #e8f5e9; color: #1b5e20; }
+    .opt.wrong    { border-color: #c62828; background: var(--red-light); color: var(--red); }
+    .opt[disabled] { cursor: default; }
+    .explanation {
+      display: none; margin-top: .7rem; padding: .7rem 1rem;
+      background: #f9f9f9; border-radius: 6px; border-left: 3px solid var(--green);
+      font-size: .92rem; line-height: 1.55;
+    }
+    .score-box {
+      display: none; text-align: center; padding: 1rem; margin-top: 1.5rem;
+      background: var(--green-bg); border-radius: 8px;
+      font-family: 'Helvetica Neue', sans-serif; font-size: 1.05rem;
+      color: var(--green); font-weight: 600;
+    }
+
+    .nav-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 3rem; padding-top: 1.5rem; border-top: 2px solid var(--green-light);
+      font-family: 'Helvetica Neue', sans-serif; font-size: .9rem;
+    }
+    .nav-footer a { color: var(--green); text-decoration: none; font-weight: 700; }
+    .nav-footer a:hover { text-decoration: underline; }
+    .nav-footer .ref-link { font-size: .85rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <p class="meta">Lesson 3 of 3 &nbsp;·&nbsp; WECA Regional Indicators Workflow</p>
+  <h1>Diagnosing Failures</h1>
+  <p class="subtitle">Reading error messages and fixing the five most common problems</p>
+  <p class="time">⏱ ~10 minutes</p>
+</header>
+
+<hr>
+
+<h2>The diagnostic mindset</h2>
+
+<p>GitHub Actions failures look alarming but they follow patterns. Every error in this project has a cause, and every cause has a documented fix. The skill is <strong>reading the error message and matching it to its cause</strong> — then applying the fix with confidence.</p>
+
+<p>There are five errors you are likely to encounter. Study each case, then test yourself in the challenge below.</p>
+
+<hr>
+<h2>The five cases</h2>
+
+<!-- Case 1 -->
+<div class="case-card">
+  <div class="case-header">
+    <div class="case-num">1</div>
+    <div class="case-title">"path does not exist: data/raw/…"</div>
+  </div>
+  <pre><code><span class="err">Error: `path` does not exist:
+  '.../data/raw/4.A.3-data_apprenticeships_starts_05.26.xlsx'</span></code></pre>
+  <div class="reveal-row">
+    <button class="reveal-btn" onclick="reveal(this, 'c1-cause')">▶ Cause</button>
+    <button class="reveal-btn reveal-btn-fix" onclick="reveal(this, 'c1-fix')">🔧 Fix</button>
+  </div>
+  <div class="reveal-content" id="c1-cause">
+    Your chapter source file changed (even a single word edit shifts its hash). Quarto detected a fingerprint mismatch and tried to re-run your R code on GitHub — but your raw data files are not committed, so it can't find them.
+  </div>
+  <div class="reveal-content fix" id="c1-fix">
+    Re-render your chapter locally (your raw data must be in <code>data/raw/</code>), then commit the updated freeze snapshot:
+    <pre><code>quarto render chapters/0X-topic/index.qmd
+git add _freeze/chapters/0X-topic/index/execute-results/html.json
+git commit -m "fix: regenerate freeze cache for environment chapter"
+git push origin your-branch-name</code></pre>
+  </div>
+</div>
+
+<!-- Case 2 -->
+<div class="case-card">
+  <div class="case-header">
+    <div class="case-num">2</div>
+    <div class="case-title">"Updates were rejected"</div>
+  </div>
+  <pre><code><span class="err">error: failed to push some refs</span>
+<span class="hint">hint: Updates were rejected because the remote contains
+hint: work that you do not have locally.</span></code></pre>
+  <div class="reveal-row">
+    <button class="reveal-btn" onclick="reveal(this, 'c2-cause')">▶ Cause</button>
+    <button class="reveal-btn" onclick="reveal(this, 'c2-fix')">🔧 Fix</button>
+  </div>
+  <div class="reveal-content" id="c2-cause">
+    Someone else pushed to your branch after your last <code>git pull</code> — or you pushed from a different machine. Git refuses to overwrite commits it doesn't know about.
+  </div>
+  <div class="reveal-content fix" id="c2-fix">
+    Pull first to integrate the remote commits, then push:
+    <pre><code>git pull origin your-branch-name
+git push origin your-branch-name</code></pre>
+    If you hit a merge conflict after pulling, resolve it, <code>git add</code> the resolved file, <code>git commit</code>, then push.
+  </div>
+</div>
+
+<!-- Case 3 -->
+<div class="case-card">
+  <div class="case-header">
+    <div class="case-num">3</div>
+    <div class="case-title">"no changes added to commit"</div>
+  </div>
+  <pre><code><span class="err">On branch heather/transport
+nothing to commit, working tree clean</span>
+<span class="hint"># — or —</span>
+<span class="err">no changes added to commit (use "git add" and/or "git commit -a")</span></code></pre>
+  <div class="reveal-row">
+    <button class="reveal-btn" onclick="reveal(this, 'c3-cause')">▶ Cause</button>
+    <button class="reveal-btn" onclick="reveal(this, 'c3-fix')">🔧 Fix</button>
+  </div>
+  <div class="reveal-content" id="c3-cause">
+    You ran <code>git commit</code> without running <code>git add</code> first. Nothing was staged, so there was nothing to commit. Or: the file you expected to have changed hasn't actually changed.
+  </div>
+  <div class="reveal-content fix" id="c3-fix">
+    Run <code>git status</code> to see what has changed, stage the files you want, then commit:
+    <pre><code>git status
+git add chapters/0X-topic/index.qmd
+git add _freeze/chapters/0X-topic/index/execute-results/html.json
+git commit -m "fix: description"</code></pre>
+  </div>
+</div>
+
+<!-- Case 4 -->
+<div class="case-card">
+  <div class="case-header">
+    <div class="case-num">4</div>
+    <div class="case-title">"cannot open file 'scripts/R/…'"</div>
+  </div>
+  <pre><code><span class="err">Error in source(...): cannot open file
+  'scripts/R/01-economy/RI_1E2_population_change.R'</span></code></pre>
+  <div class="reveal-row">
+    <button class="reveal-btn" onclick="reveal(this, 'c4-cause')">▶ Cause</button>
+    <button class="reveal-btn" onclick="reveal(this, 'c4-fix')">🔧 Fix</button>
+  </div>
+  <div class="reveal-content" id="c4-cause">
+    The R script exists on your machine but was never committed to git. GitHub has no copy of it. This often happens when an analyst commits the chapter source but forgets the indicator script and/or the fact CSV.
+  </div>
+  <div class="reveal-content fix" id="c4-fix">
+    Stage and commit the missing files. Also double-check the filename matches exactly what the chapter <code>source()</code>s — reversing digit groups (<code>RI_3E1_</code> vs <code>RI_1E3_</code>) is a common mistake:
+    <pre><code>git add scripts/R/01-economy/RI_1E2_population_change.R
+git add data/fact/RI_1E2_population_change.csv
+git commit -m "fix: add missing indicator script and fact data"
+git push origin your-branch-name</code></pre>
+  </div>
+</div>
+
+<!-- Case 5 -->
+<div class="case-card">
+  <div class="case-header">
+    <div class="case-num">5</div>
+    <div class="case-title">Pushed to the wrong branch</div>
+  </div>
+  <pre><code><span class="ok"># You meant to push to heather/transport but pushed to main</span>
+<span class="ok"># — or committed to your branch when you meant main</span></code></pre>
+  <div class="reveal-row">
+    <button class="reveal-btn" onclick="reveal(this, 'c5-cause')">▶ Cause</button>
+    <button class="reveal-btn" onclick="reveal(this, 'c5-fix')">🔧 Fix</button>
+  </div>
+  <div class="reveal-content" id="c5-cause">
+    You forgot to create or switch to your feature branch before committing. Changes landed on the wrong branch.
+  </div>
+  <div class="reveal-content fix" id="c5-fix">
+    Switch to the right branch, get the latest main, re-render if needed, and re-apply your changes:
+    <pre><code>git checkout main
+git pull origin main
+# re-render or re-apply your fix on main (if that's where it belongs)
+# — OR — to move commits FROM main TO your branch:
+git branch yourname/chapter-name     # create branch from current state
+git checkout main
+git reset --soft HEAD~1              # undo commit but keep changes staged
+git checkout yourname/chapter-name   # switch to correct branch
+git commit -m "feat: description"    # re-commit on the right branch</code></pre>
+  </div>
+</div>
+
+<hr>
+
+<!-- Diagnosis challenge -->
+<div class="quiz-wrap" id="quiz">
+  <h2>Diagnosis challenge</h2>
+  <p style="color:var(--muted);font-size:.9rem;margin-bottom:1.5rem;">Given an error message, identify the most likely cause. Click an answer to reveal the explanation.</p>
+
+  <!-- Q1 -->
+  <div class="question" id="q1">
+    <p class="q-text">GitHub Actions fails on your PR with this error. What's the most likely cause?</p>
+    <div class="q-pre"><span class="err">Error: `path` does not exist:
+  '.../data/raw/RI_5A1_renewable_capacity.xlsx'</span></div>
+    <div class="options">
+      <button class="opt" data-correct="false" onclick="answer(this,1)">The raw data file path changed on GitHub's server.</button>
+      <button class="opt" data-correct="true"  onclick="answer(this,1)">The chapter source was edited but the freeze cache was not re-committed.</button>
+      <button class="opt" data-correct="false" onclick="answer(this,1)">The indicator script references the wrong filename for the raw data.</button>
+      <button class="opt" data-correct="false" onclick="answer(this,1)">The branch is ahead of main and needs rebasing before merge.</button>
+    </div>
+    <div class="explanation" id="exp1">
+      A "path does not exist: data/raw/…" error on GitHub always means Quarto tried to re-run your R code — which it only does when the source fingerprint has changed. The freeze cache is out of date. Fix: re-render locally, commit the updated <code>html.json</code>.
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="question" id="q2">
+    <p class="q-text">You run <code>git push</code> and see this. What must you do first?</p>
+    <div class="q-pre"><span class="err">error: failed to push some refs to 'origin'</span>
+<span class="hint">hint: Updates were rejected because the remote contains work that you do not have locally.</span></div>
+    <div class="options">
+      <button class="opt" data-correct="false" onclick="answer(this,2)">Delete the remote branch and re-push with --force.</button>
+      <button class="opt" data-correct="false" onclick="answer(this,2)">Open a new PR targeting a different base branch.</button>
+      <button class="opt" data-correct="true"  onclick="answer(this,2)">Pull from the remote branch to integrate its commits, then push again.</button>
+      <button class="opt" data-correct="false" onclick="answer(this,2)">Reset your local branch to match origin and re-apply your changes.</button>
+    </div>
+    <div class="explanation" id="exp2">
+      Git won't let you overwrite remote commits you haven't seen locally. The fix is <code>git pull origin your-branch-name</code> to merge the remote changes, then <code>git push</code>. Never use <code>--force</code> on a shared branch — it destroys other people's work.
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="question" id="q3">
+    <p class="q-text">The book renders locally but GitHub Actions fails for your chapter with this error. What's missing?</p>
+    <div class="q-pre"><span class="err">Error in source(...): cannot open file
+  'scripts/R/05-environment/RI_5A1_renewable_capacity.R'</span></div>
+    <div class="options">
+      <button class="opt" data-correct="false" onclick="answer(this,3)">The R script has a bug — it references a function that doesn't exist.</button>
+      <button class="opt" data-correct="false" onclick="answer(this,3)">The freeze cache fingerprint is stale and needs refreshing.</button>
+      <button class="opt" data-correct="true"  onclick="answer(this,3)">The indicator R script was never committed to git.</button>
+      <button class="opt" data-correct="false" onclick="answer(this,3)">renv is not installed on the GitHub Actions runner.</button>
+    </div>
+    <div class="explanation" id="exp3">
+      If a file exists on your machine but not in git, GitHub can't find it. "cannot open file" inside <code>source()</code> on GitHub almost always means the script was never <code>git add</code>ed. Check: <code>git status</code> to confirm, then <code>git add scripts/R/05-environment/RI_5A1_renewable_capacity.R</code>.
+    </div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="question" id="q4">
+    <p class="q-text">You edit your chapter heading, render successfully, but <em>forget</em> to <code>git add</code> the freeze cache. You commit and push the source file only. What happens?</p>
+    <div class="options">
+      <button class="opt" data-correct="false" onclick="answer(this,4)">Nothing — Quarto will use the old freeze cache since the render succeeded.</button>
+      <button class="opt" data-correct="true"  onclick="answer(this,4)">GitHub fails with "path does not exist" — the source fingerprint changed but the cache is stale.</button>
+      <button class="opt" data-correct="false" onclick="answer(this,4)">The chapter renders blank — no outputs are found in the cache.</button>
+      <button class="opt" data-correct="false" onclick="answer(this,4)">The PR is blocked — GitHub detects the cache and source are out of sync.</button>
+    </div>
+    <div class="explanation" id="exp4">
+      The cached <code>html.json</code> stores the fingerprint of the version you rendered locally. When you push a different (edited) source without updating the cache, the fingerprint in the stale <code>html.json</code> no longer matches. GitHub tries to re-execute — and fails without your raw data. Always commit the four files together.
+    </div>
+  </div>
+
+  <div class="score-box" id="score-box"></div>
+</div>
+
+<div class="callout">
+  <p class="callout-label">The mental model</p>
+  <p>"path does not exist: data/raw/…" = <strong>stale freeze cache</strong>. Diagnose by asking: <em>did the source change without a matching cache re-commit?</em> Answer yes → re-render, commit <code>html.json</code>.</p>
+</div>
+
+<p style="font-size:.9rem;color:var(--muted);margin-top:2rem;">
+  <strong>Primary source:</strong> <a href="https://github.com/westofengland-ca/weca_regional_indicators/blob/main/docs/WORKFLOW_LEARNING_GUIDE.md" style="color:var(--green);">WORKFLOW_LEARNING_GUIDE.md §Diagnosing and fixing common errors</a>
+</p>
+<p style="font-size:.9rem;color:var(--muted);">
+  Have a question? Ask your teacher in this conversation — just type it and continue the session.
+</p>
+
+<nav class="nav-footer">
+  <a href="0002-branching-workflow.html">← Lesson 2: Your Workflow</a>
+  <a class="ref-link" href="workflow-cheatsheet.html">📄 Quick Reference →</a>
+</nav>
+
+<script>
+  /* ── Reveal toggles for case cards ── */
+  function reveal(btn, id) {
+    const el = document.getElementById(id);
+    const showing = el.style.display === 'block';
+    el.style.display = showing ? 'none' : 'block';
+    btn.classList.toggle('active', !showing);
+  }
+
+  /* ── Quiz ── */
+  let scores = { correct: 0, answered: 0, total: 4 };
+
+  function answer(btn, qNum) {
+    const container = document.getElementById('q' + qNum);
+    const exp = document.getElementById('exp' + qNum);
+    const isCorrect = btn.dataset.correct === 'true';
+    container.querySelectorAll('.opt').forEach(b => {
+      b.disabled = true;
+      if (b.dataset.correct === 'true') b.classList.add('correct');
+    });
+    if (!isCorrect) btn.classList.add('wrong');
+    exp.style.display = 'block';
+    scores.answered++;
+    if (isCorrect) scores.correct++;
+    if (scores.answered === scores.total) showScore();
+  }
+  function showScore() {
+    const box = document.getElementById('score-box');
+    const pct = Math.round(scores.correct / scores.total * 100);
+    const msg = pct === 100 ? '🎉 Perfect — you can diagnose these cold.' : pct >= 75 ? '👍 Good. Review the one you missed.' : '📖 Run through the case cards again, then retry.';
+    box.textContent = scores.correct + ' / ' + scores.total + ' correct. ' + msg;
+    box.style.display = 'block';
+  }
+</script>
+</body>
+</html>

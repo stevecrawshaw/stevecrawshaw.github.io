@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WECA Indicators — Contributing Workflow</title>
+  <style>
+    :root {
+      --green: #2e7d32; --green-med: #388e3c; --green-light: #c8e6c9;
+      --green-bg: #f1f8e9; --bg: #fafaf8; --text: #1a1a1a; --muted: #666;
+      --border: #e0e0e0; --shadow: 0 2px 10px rgba(0,0,0,0.07);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 18px; line-height: 1.8;
+      max-width: 660px; margin: 0 auto; padding: 3rem 1.5rem 5rem;
+      background: var(--bg); color: var(--text);
+    }
+    h1 { font-size: 2rem; color: var(--green); line-height: 1.2; margin-bottom: .4rem; }
+    h2 { font-size: 1.2rem; color: var(--green-med); margin: 2rem 0 .8rem;
+         border-bottom: 2px solid var(--green-light); padding-bottom: .3rem; }
+    p  { margin-bottom: 1rem; }
+    .subtitle { font-style: italic; color: var(--muted); font-size: 1rem; margin-bottom: .4rem; }
+    .meta { font-family: 'Helvetica Neue', sans-serif; font-size: .8rem;
+            text-transform: uppercase; letter-spacing: .08em; color: var(--green); font-weight: 700; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+    .card-grid { display: flex; flex-direction: column; gap: .75rem; margin: 1rem 0; }
+    .card {
+      display: flex; align-items: stretch; gap: 0;
+      background: white; border: 1px solid var(--border); border-radius: 10px;
+      box-shadow: var(--shadow); overflow: hidden; text-decoration: none; color: inherit;
+      transition: box-shadow .15s, transform .1s;
+    }
+    .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); transform: translateY(-1px); }
+    .card-accent {
+      width: 6px; flex-shrink: 0;
+      background: var(--green);
+    }
+    .card-accent.ref { background: #1565c0; }
+    .card-body { padding: 1rem 1.2rem; flex: 1; }
+    .card-num {
+      font-family: 'Helvetica Neue', sans-serif; font-size: .72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em; color: var(--green); margin-bottom: .2rem;
+    }
+    .card-num.ref { color: #1565c0; }
+    .card-title { font-weight: 700; font-size: 1.05rem; margin-bottom: .25rem; }
+    .card-desc { font-size: .88rem; color: var(--muted); line-height: 1.5; margin: 0; }
+    .card-time {
+      font-family: 'Helvetica Neue', sans-serif; font-size: .75rem; color: #aaa;
+      margin-top: .35rem;
+    }
+
+    .callout {
+      border-left: 4px solid var(--green); background: var(--green-bg);
+      border-radius: 0 6px 6px 0; padding: .9rem 1.2rem; margin: 1.5rem 0;
+    }
+    .callout p:last-child { margin-bottom: 0; }
+    .callout strong { color: var(--green); }
+  </style>
+</head>
+<body>
+
+<p class="meta">West of England Combined Authority</p>
+<h1>Contributing to the Regional Indicators Report</h1>
+<p class="subtitle">Three lessons + a quick reference for analysts new to the publishing workflow</p>
+
+<hr>
+
+<p>These lessons cover the <strong>freeze cache</strong> — the mechanism that lets five analysts publish a shared book without sharing raw data — the step-by-step workflow for contributing your chapter, and how to read and fix the most common publishing errors.</p>
+
+<p>Work through them in order. Each takes under 15 minutes and includes an interactive exercise to check your understanding.</p>
+
+<h2>Lessons</h2>
+
+<div class="card-grid">
+  <a class="card" href="0001-the-freeze-cache.html">
+    <div class="card-accent"></div>
+    <div class="card-body">
+      <div class="card-num">Lesson 1</div>
+      <div class="card-title">The Freeze Cache</div>
+      <p class="card-desc">Why it exists, how the fingerprint check works, and the four files you always commit together.</p>
+      <p class="card-time">⏱ ~10 minutes · Quiz included</p>
+    </div>
+  </a>
+  <a class="card" href="0002-branching-workflow.html">
+    <div class="card-accent"></div>
+    <div class="card-body">
+      <div class="card-num">Lesson 2</div>
+      <div class="card-title">Your Workflow</div>
+      <p class="card-desc">Branch naming, the six-step contribution workflow, what never to commit, and conventional commit messages.</p>
+      <p class="card-time">⏱ ~15 minutes · Drag-and-order exercise + quiz</p>
+    </div>
+  </a>
+  <a class="card" href="0003-diagnosing-failures.html">
+    <div class="card-accent"></div>
+    <div class="card-body">
+      <div class="card-num">Lesson 3</div>
+      <div class="card-title">Diagnosing Failures</div>
+      <p class="card-desc">The five most common GitHub Actions errors — cause, fix, and a diagnosis challenge to test yourself.</p>
+      <p class="card-time">⏱ ~10 minutes · Reveal cards + quiz</p>
+    </div>
+  </a>
+</div>
+
+<h2>Reference</h2>
+
+<div class="card-grid">
+  <a class="card" href="workflow-cheatsheet.html">
+    <div class="card-accent ref"></div>
+    <div class="card-body">
+      <div class="card-num ref">Quick reference · print-friendly</div>
+      <div class="card-title">Workflow Cheatsheet</div>
+      <p class="card-desc">The fingerprint diagram, the four files, the full command sequence, commit types, the error index, and the never-commit list — all on one page.</p>
+    </div>
+  </a>
+</div>
+
+<hr>
+
+<div class="callout">
+  <p><strong>Source documents:</strong> all content is drawn directly from <a href="https://github.com/westofengland-ca/weca_regional_indicators/blob/main/CONTRIBUTING.md" style="color:var(--green)">CONTRIBUTING.md</a> and <a href="https://github.com/westofengland-ca/weca_regional_indicators/blob/main/docs/WORKFLOW_LEARNING_GUIDE.md" style="color:var(--green)">WORKFLOW_LEARNING_GUIDE.md</a> in the project repository. If in doubt, those documents are authoritative.</p>
+</div>
+
+</body>
+</html>
