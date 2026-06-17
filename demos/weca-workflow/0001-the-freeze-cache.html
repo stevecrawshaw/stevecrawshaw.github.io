@@ -291,17 +291,12 @@
   </div>
 </div>
 
-<div class="callout">
-  <p class="callout-label">The freeze path — get it right</p>
-  <p>There is <em>no</em> <code>html/</code> folder between <code>_freeze/</code> and <code>chapters/</code>. The correct path is:</p>
-  <pre style="margin:.5rem 0 0"><code>_freeze/chapters/0X-topic/index/execute-results/html.json</code></pre>
-</div>
-
 <h2>The workflow in sequence</h2>
 
 <ol class="step-list">
+  <li><p><strong>Start from a fresh main</strong> — always branch from an up-to-date main before doing any work. <br><code>git checkout main &amp;&amp; git pull &amp;&amp; git checkout -b yourname/chapter-name</code></p></li>
   <li><p><strong>Render your chapter</strong> locally — your raw data must be in <code>data/raw/</code>. <br><code>quarto render chapters/0X-topic/index.qmd</code></p></li>
-  <li><p><strong>Check what git sees</strong> — verify all four files appear as modified or untracked. <br><code>git status</code></p></li>
+  <li><p><strong>Check what git sees</strong> — verify the four files appear as modified or untracked, and that nothing unexpected has changed. <br><code>git status</code></p></li>
   <li><p><strong>Stage exactly the right files</strong> — name them individually, never <code>git add .</code></p></li>
   <li><p><strong>Commit and push</strong> to your branch.</p></li>
 </ol>

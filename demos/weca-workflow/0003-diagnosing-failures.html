@@ -210,7 +210,17 @@ hint: work that you do not have locally.</span></code></pre>
     Pull first to integrate the remote commits, then push:
     <pre><code>git pull origin your-branch-name
 git push origin your-branch-name</code></pre>
-    If you hit a merge conflict after pulling, resolve it, <code>git add</code> the resolved file, <code>git commit</code>, then push.
+    If you hit a merge conflict, git marks the conflicting file(s) and stops. Open each flagged file and look for conflict markers:
+    <pre><code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+your local version
+=======
+the incoming version
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; origin/your-branch-name</code></pre>
+    Edit the file to keep the correct content (delete the markers and the version you don't want), save, then:
+    <pre><code>git add the-resolved-file.qmd
+git commit -m "fix: resolve merge conflict"
+git push origin your-branch-name</code></pre>
+    For <code>.qmd</code> files, usually keep <em>both</em> sets of changes merged together rather than picking one side.
   </div>
 </div>
 
